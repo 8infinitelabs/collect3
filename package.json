@@ -1,0 +1,18 @@
+{
+  "name": "collect3",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/diegotorreslopez81/collect3.git",
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lerna": "^6.4.1"
+  },
+  "scripts": {
+    "lint": "lerna run lint --stream",
+    "dev": "lerna run dev --stream",
+    "prepare": "husky install",
+    "precommit": "lint-staged"
+  }
+}
