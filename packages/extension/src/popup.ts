@@ -1,62 +1,42 @@
 'use strict';
 
 import './popup.css';
+import { Article, openPreview, storage } from './utils';
 
-(function () {
-  // We will make use of Storage API to get and store `count` value
-  // More information on Storage API can we found at
-  // https://developer.chrome.com/extensions/storage
-
-  // To get storage access, we have to mention it in `permissions` property of manifest.json file
-  // More information on Permissions can we found at
-  // https://developer.chrome.com/extensions/declare_permissions
-  // const counterStorage = {
-  //   get: (cb: (count: number) => void) => {
-  //     chrome.storage.sync.get(['count'], (result) => {
-  //       cb(result.count);
-  //     });
-  //   },
-  //   set: (value: number, cb: () => void) => {
-  //     chrome.storage.sync.set(
-  //       {
-  //         count: value,
-  //       },
-  //       () => {
-  //         cb();
-  //       }
-  //     );
-  //   },
-  // };
-
-  
+(function () {  
   async function collect() {
+    console.log("collect");
     const tabs = await chrome.tabs.query({active: true, currentWindow: true});
     if (tabs[0].id) {
-      const response = await chrome.tabs.sendMessage(
+      const response: Article | undefined = await chrome.tabs.sendMessage(
         tabs[0].id,
-        { type: 'getHtml' },
+        { type: "getHtml" },
       );
-      console.log('response', response);
+      console.log("response", response);
       if(response === undefined) {
-        console.warn('failed to get article content')
+        console.warn("failed to get article content");
+        return undefined;
       }
+      let src = `<html><head></head><body>${response!.content}</body></html>`;
+      storage.set(src);
+      await openPreview();
     }
   }
 
   function mint() {
-    console.log('mint');
+    console.log("mint");
   }
   
   function setupListeners() {
 
-    document.getElementById('collectBtn')!.addEventListener('click', () => {
+    document.getElementById("collectBtn")!.addEventListener("click", () => {
       collect();
     });
 
-    document.getElementById('mintBtn')!.addEventListener('click', () => {
+    document.getElementById("mintBtn")!.addEventListener("click", () => {
       mint();
     });
   }
   
-  document.addEventListener('DOMContentLoaded', setupListeners);
+  document.addEventListener("DOMContentLoaded", setupListeners);
 })();

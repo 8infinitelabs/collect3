@@ -1,5 +1,6 @@
 'use strict';
 import readability from '@mozilla/readability';
+import { Article } from './utils';
 // Content script file will run in the context of web page.
 // With content script you can manipulate the web pages using
 // Document Object Model (DOM).
@@ -10,18 +11,6 @@ import readability from '@mozilla/readability';
 
 // For more information on Content Scripts,
 // See https://developer.chrome.com/extensions/content_scripts
-
-interface Article {
-  title: string;
-  content: string;
-  textContent: string;
-  length: number;
-  excerpt: string;
-  byline: string;
-  dir: string;
-  siteName: string;
-  lang: string;
-}
 
 function getCleanedHtml(): Article | undefined {
   try {
@@ -35,10 +24,9 @@ function getCleanedHtml(): Article | undefined {
   }
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  let response;
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type === 'getHtml') {
-    response = getCleanedHtml();
+    let response = getCleanedHtml();
+    sendResponse(response);
   }
-  sendResponse(response);
 });

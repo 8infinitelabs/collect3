@@ -18,14 +18,13 @@
   },
   "permissions": [
     "storage",
-    "activeTab",
-    "pageCapture",
-    "alarms"
+    "activeTab"
   ],
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "<all_urls>",
+        "*://hmglkhjdmcokefgolfagfkabjndmicnn/*"
       ],
       "run_at": "document_idle",
       "js": [

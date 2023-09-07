@@ -12,6 +12,7 @@ const config = (env, argv) =>
       popup: PATHS.src + '/popup.ts',
       contentScript: PATHS.src + '/contentScript.ts',
       background: PATHS.src + '/background.ts',
+      preview: PATHS.src + '/preview.ts',
     },
     devtool: argv.mode === 'production' ? false : 'source-map',
   });
