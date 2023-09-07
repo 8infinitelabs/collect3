@@ -13,3 +13,6 @@ npm-debug.log*
 
 # packed files
 /release
+
+# keys
+/packages/extension.pem
