@@ -1,14 +1,15 @@
 'use strict';
 
 import './popup.css';
-import { Article, openPreview, storage } from './utils';
+import { openPreview } from './utils/utils';
+import { saveArticle } from './utils/storage';
 
 (function () {  
   async function collect() {
     console.log("collect");
     const tabs = await chrome.tabs.query({active: true, currentWindow: true});
     if (tabs[0].id) {
-      const response: Article | undefined = await chrome.tabs.sendMessage(
+      const response = await chrome.tabs.sendMessage(
         tabs[0].id,
         { type: "getHtml" },
       );
@@ -17,9 +18,8 @@ import { Article, openPreview, storage } from './utils';
         console.warn("failed to get article content");
         return undefined;
       }
-      let src = `<html><head></head><body>${response!.content}</body></html>`;
-      storage.set(src);
-      await openPreview();
+      await saveArticle(response.url, response.article);
+      await openPreview(response.url);
     }
   }
 

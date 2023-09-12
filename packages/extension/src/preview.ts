@@ -17,6 +17,10 @@ function setIframeData(data: string) {
   iframeContainer!.appendChild(iframe);
 }
 
-chrome.storage.local.get(["article"], (result) => {
-  setIframeData(result.article);
+const params = new URLSearchParams(location.search);
+const url = params.get('url');
+
+chrome.storage.local.get([url], (result) => {
+  console.log(url);
+  setIframeData(result[`${url}`]);
 });
