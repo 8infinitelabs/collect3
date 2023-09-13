@@ -1,4 +1,5 @@
 import "./preview.css";
+import { getArticles, getArticleContent } from "../../utils/storage";
 
 function setIframeData(data: string) {
   const iframeContainer = document.querySelector("body > div > div")
@@ -9,7 +10,6 @@ function setIframeData(data: string) {
     [data],
     {type: "text/html"}
   );
-  console.log(data);
     
   iframe.src = window.URL.createObjectURL(blob);
     
@@ -19,8 +19,17 @@ function setIframeData(data: string) {
 
 const params = new URLSearchParams(location.search);
 const url = params.get('url');
+const urlTitle = params.get('title');
 
-chrome.storage.local.get([url], (result) => {
-  console.log(url);
-  setIframeData(result[`${url}`]);
+getArticleContent(url as string).then((article) => {
+  setIframeData(article);
+});
+
+getArticles().then((articles) => {
+  const article = articles.get(url as string);
+  const title: string  = article?.title || urlTitle || '';
+  if(title !== null && title !== undefined) {
+    const titleElement = document.querySelector("#title");
+    titleElement!.innerHTML = title;
+  }
 });

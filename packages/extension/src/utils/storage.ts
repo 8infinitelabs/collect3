@@ -7,7 +7,7 @@ export async function getFromStorage(key: string) : Promise<any> {
   });
 }
 
-export async function setToStorage(key: string, value: any) {
+export async function setToStorage(key: string, value: any): Promise<void> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({[key]: value}, function () {
       resolve(undefined);
@@ -15,7 +15,15 @@ export async function setToStorage(key: string, value: any) {
   });
 }
 
-export async function getArticles(): Promise<Map<string, any>> {
+export async function removeFromStorage(key: string) : Promise<void> {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.remove(key, function () {
+      resolve(undefined);
+    });
+  });
+}
+
+export async function getArticles(): Promise<Map<string, Metadata>> {
   let articles = await getFromStorage('articles');
   if (!articles) {
     return new Map();
@@ -25,7 +33,7 @@ export async function getArticles(): Promise<Map<string, any>> {
   return articles;
 }
 
-export async function setArticles(url: string, data: Metadata, articles: Map<string, any>) {
+export async function setArticles(url: string, data: Metadata, articles: Map<string, Metadata>) {
   if (!articles.has(url)) {
     articles.set(url, data);
     await setToStorage(
@@ -38,18 +46,39 @@ export async function setArticles(url: string, data: Metadata, articles: Map<str
     );
   }
 }
+
+export async function removeArticles(url: string) : Promise<boolean> {
+  const articles = await getArticles();
+  const result = articles.delete(url);
+  if (result) {
+    await setToStorage(
+      'articles',
+      JSON.stringify(
+        Array.from(
+          articles.entries(),
+        ),
+      ),
+    );
+  }
+  return result;
+}
+
 export async function getArticleContent(url: string) {
   return getFromStorage(url);
 }
 
-export async function setArticleContent(url: string, content: string) {
+export async function setArticleContent(url: string, content: string): Promise<void> {
   const exist = await getArticleContent(url);
   if(!exist) {
     await setToStorage(url, content);
   }
 }
 
-export async function saveArticle(url: string, article: Article) {
+export async function deleteArticleContent(url: string) : Promise<void> {
+  await removeFromStorage(url);
+}
+
+export async function saveArticle(url: string, article: Article) : Promise<void> {
   const articles = await getArticles();
   const metadata: Metadata = { ...article };
   if (!articles.has(url)) {
@@ -59,4 +88,9 @@ export async function saveArticle(url: string, article: Article) {
       `<html><head></head><body>${article!.content}</body></html>`,
     );
   }
+}
+
+export async function deleteArticle(url: string) : Promise<void> {
+  await deleteArticle(url);
+  await deleteArticleContent(url);
 }

@@ -21,17 +21,26 @@ html {
   justify-content: center;
   flex-direction: column;
   text-align: center;
-  padding: 20px;
 }
 
-.iframe-container {
-  height: 100%;
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   width: 100%;
+  height: 100%;
 }
 
-#collected-content {
-  display: block;
-  height: 100%;
-  width: 100%;
-  border: none;
+.article {
+  text-decoration: none;
+}
+
+.article-header {
+  display: inline-block;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  gap: 1rem;
 }

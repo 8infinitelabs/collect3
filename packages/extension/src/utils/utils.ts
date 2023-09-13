@@ -20,8 +20,15 @@ export interface Metadata {
   lang: string;
 }
 
-export async function openPreview (path: string) : Promise<chrome.tabs.Tab> {
+export async function openPreview (path: string, title? : string) : Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('preview.html');
   url += `?url=${encodeURIComponent(path)}`
+  if (title) {
+    url += `&title=${title}`;
+  }
   return await chrome.tabs.create({ url, active: false, });
+}
+export async function openArticles() : Promise<chrome.tabs.Tab>  {
+  let url = chrome.runtime.getURL('articles.html');
+  return await chrome.tabs.create({ url, });
 }
