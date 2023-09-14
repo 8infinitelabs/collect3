@@ -91,6 +91,12 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
 }
 
 export async function deleteArticle(url: string) : Promise<void> {
-  await deleteArticle(url);
+  await removeArticles(url);
   await deleteArticleContent(url);
+}
+
+export function listenToStorage(
+  cb: (changes: {[key: string]: chrome.storage.StorageChange; }) => void,
+  ) {
+    chrome.storage.local.onChanged.addListener(cb)
 }
