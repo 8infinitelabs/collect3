@@ -6,46 +6,58 @@ import { saveArticle, setToStorage } from './utils/storage';
 
 (function () {  
   async function collect() {
-    console.log("collect");
-    const tabs = await chrome.tabs.query({active: true, currentWindow: true});
-    if (tabs[0].id) {
-      const response = await chrome.tabs.sendMessage(
-        tabs[0].id,
-        { type: "getHtml" },
-      );
-      console.log("response", response);
-      if(response === undefined) {
-        console.warn("failed to get article content");
-        return undefined;
+    try {
+      console.log("collect");
+      const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+      if (tabs[0]?.id) {
+        const response = await chrome.tabs.sendMessage(
+          tabs[0]?.id,
+          { type: "getHtml" },
+        );
+        console.log("response", response);
+        if(response === undefined) {
+          console.warn("failed to get article content");
+          return undefined;
+        }
+        await saveArticle(response.url, response.article);
+        await openPreview(response.url);
       }
-      await saveArticle(response.url, response.article);
-      await openPreview(response.url);
+    } catch (error) {
+      console.error("Error in collect function:", error);
     }
   }
-
+  
   async function preview() {
-    const tabs = await chrome.tabs.query({active: true, currentWindow: true});
-    if (tabs[0].id) {
-      const response = await chrome.tabs.sendMessage(
-        tabs[0].id,
-        { type: "getHtml" },
-      );
-      console.log("response", response);
-      if(response === undefined) {
-        console.warn("failed to get article content");
-        return undefined;
+    try {
+      const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+      if (tabs[0]?.id) {
+        const response = await chrome.tabs.sendMessage(
+          tabs[0]?.id,
+          { type: "getHtml" },
+        );
+        console.log("response", response);
+        if(response === undefined) {
+          console.warn("failed to get article content");
+          return undefined;
+        }
+        const key = 'preview' 
+        await setToStorage(
+          key,
+          `<html><head></head><body>${response.article!.content}</body></html>`,
+        );
+        await openPreview('preview', response.article!.title);
       }
-      const key = 'preview' 
-      await setToStorage(
-        key,
-        `<html><head></head><body>${response.article!.content}</body></html>`,
-      );
-      await openPreview('preview', response.article!.title);
+    } catch (error) {
+      console.error("Error in preview function:", error);
     }
   }
-
+  
   async function manageArticles() {
-    await openArticles();
+    try {
+      await openArticles();
+    } catch (error) {
+      console.error("Error in manageArticles function:", error);
+    }
   }
   
   function setupListeners() {
