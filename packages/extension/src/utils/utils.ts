@@ -26,7 +26,7 @@ export async function openPreview (path: string, title? : string) : Promise<chro
   if (title) {
     url += `&title=${title}`;
   }
-  return await chrome.tabs.create({ url, active: false, });
+  return await chrome.tabs.create({ url, });
 }
 export async function openArticles() : Promise<chrome.tabs.Tab>  {
   let url = chrome.runtime.getURL('articles.html');
