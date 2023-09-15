@@ -80,9 +80,9 @@ export async function deleteArticleContent(url: string) : Promise<void> {
 
 export async function saveArticle(url: string, article: Article) : Promise<void> {
   const articles = await getArticles();
-  const metadata: Metadata = { ...article };
+  const { content, textContent, ...metadata } = article;
   if (!articles.has(url)) {
-    await setArticles(url, metadata, articles);
+    await setArticles(url, metadata as Metadata, articles);
     await setArticleContent(
       url,
       `<html><head></head><body>${article!.content}</body></html>`,
