@@ -1,7 +1,7 @@
 'use strict';
 
 import './popup.css';
-import { openPreview, openArticles } from './utils/utils';
+import { openPreview, openArticles, articleContentToHtml } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
 
 (function () {  
@@ -40,12 +40,13 @@ import { saveArticle, setToStorage } from './utils/storage';
           console.warn("failed to get article content");
           return undefined;
         }
-        const key = 'preview' 
+        const key = 'preview';
+        const content = articleContentToHtml(response.article!.content, response.article!.title);
         await setToStorage(
           key,
-          `<html><head></head><body>${response.article!.content}</body></html>`,
+          content,
         );
-        await openPreview('preview', response.article!.title);
+        await openPreview('preview');
       }
     } catch (error) {
       console.error("Error in preview function:", error);

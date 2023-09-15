@@ -1,4 +1,4 @@
-import { Metadata, Article } from "./utils";
+import { Metadata, Article, articleContentToHtml } from "./utils";
 export async function getFromStorage(key: string) : Promise<any> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], function (result) {
@@ -87,9 +87,10 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   metadata.length = Math.ceil( numOfWords / wpm );
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
+    const content = articleContentToHtml(article!.content, article!.title);
     await setArticleContent(
       url,
-      `<html><head></head><body>${article!.content}</body></html>`,
+      content,
     );
   }
 }
