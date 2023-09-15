@@ -81,6 +81,10 @@ export async function deleteArticleContent(url: string) : Promise<void> {
 export async function saveArticle(url: string, article: Article) : Promise<void> {
   const articles = await getArticles();
   const { content, textContent, ...metadata } = article;
+  const numOfWords = textContent.split(' ').length;
+  // 255 is the word per minute constant
+  const wpm = 255;
+  metadata.length = Math.ceil( numOfWords / wpm );
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
     await setArticleContent(

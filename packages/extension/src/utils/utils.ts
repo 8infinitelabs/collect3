@@ -12,7 +12,7 @@ export interface Article {
 
 export interface Metadata {
   title: string;
-  length: number;
+  length: number; //duration in minutes
   excerpt: string; //description or extraction of the article
   byline: string; //author
   dir: string;

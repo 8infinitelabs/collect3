@@ -10,8 +10,11 @@ function articleToElement(key: string, article : Metadata) : HTMLLIElement {
     <p>
       ${article.excerpt}
     </p>
+    <div>
+    <span>${article.length} ${article.length == 1? 'minute': 'minutes'} to read</span>
+    <span>in ${article.lang}</span>
+    </div>
     <a href="${chrome.runtime.getURL('preview.html')}?url=${encodeURIComponent(key)}" target="_blank" class="main">Read Article</a>
-    <span>${article.lang}</span>
     <button id="${key}" title="click to close" aria-label="click to close">x</button>
   `;
   const root = document.createElement("li");
