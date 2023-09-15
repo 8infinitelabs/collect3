@@ -23,7 +23,7 @@ export interface Metadata {
 export async function openPreview (path: string) : Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('preview.html');
   url += `?url=${encodeURIComponent(path)}`
-  return await chrome.tabs.create({ url, active: false });
+  return await chrome.tabs.create({ url, });
 }
 export async function openArticles() : Promise<chrome.tabs.Tab>  {
   let url = chrome.runtime.getURL('articles.html');
