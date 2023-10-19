@@ -1,16 +1,16 @@
 'use strict';
 
 import './popup.css';
-import { openPreview, openArticles, articleContentToHtml } from './utils/utils';
+import { openPreview, openArticles, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
 
-(function () {  
+(function () {
   async function collect() {
     try {
       console.log("collect");
       const tabs = await chrome.tabs.query({active: true, currentWindow: true});
       if (tabs[0]?.id) {
-        const response = await chrome.tabs.sendMessage(
+        const response: { url: string, article: Article } = await chrome.tabs.sendMessage(
           tabs[0]?.id,
           { type: "getHtml" },
         );
@@ -26,12 +26,12 @@ import { saveArticle, setToStorage } from './utils/storage';
       console.error("Error in collect function:", error);
     }
   }
-  
+
   async function preview() {
     try {
       const tabs = await chrome.tabs.query({active: true, currentWindow: true});
       if (tabs[0]?.id) {
-        const response = await chrome.tabs.sendMessage(
+        const response: { article: Article } = await chrome.tabs.sendMessage(
           tabs[0]?.id,
           { type: "getHtml" },
         );
@@ -52,7 +52,7 @@ import { saveArticle, setToStorage } from './utils/storage';
       console.error("Error in preview function:", error);
     }
   }
-  
+
   async function manageArticles() {
     try {
       await openArticles();
@@ -60,7 +60,7 @@ import { saveArticle, setToStorage } from './utils/storage';
       console.error("Error in manageArticles function:", error);
     }
   }
-  
+
   function setupListeners() {
     document.getElementById("previewBtn")!.addEventListener("click", () => {
       preview();
@@ -74,6 +74,6 @@ import { saveArticle, setToStorage } from './utils/storage';
       manageArticles();
     });
   }
-  
+
   document.addEventListener("DOMContentLoaded", setupListeners);
 })();
