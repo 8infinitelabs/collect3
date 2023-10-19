@@ -109,22 +109,12 @@ Maybe you can mention me or this repo in the acknowledgements too
   <ul>
     <li><a href="https://www.typescriptlang.org/">Typescript</a></li>
     <li><a href="https://expressjs.com/">Express.js</a></li>
-    <li><a href="https://go.dev/">Golang</a></li>
-    <li><a href="https://nestjs.com/">Nest.js</a></li>
-    <li><a href="https://socket.io/">SocketIO</a></li>
-    <li><a href="https://www.prisma.io/">Prisma</a></li>    
-    <li><a href="https://www.apollographql.com/">Apollo</a></li>
-    <li><a href="https://graphql.org/">GraphQL</a></li>
   </ul>
 </details>
 
 <details>
 <summary>Database</summary>
   <ul>
-    <li><a href="https://www.mysql.com/">MySQL</a></li>
-    <li><a href="https://www.postgresql.org/">PostgreSQL</a></li>
-    <li><a href="https://redis.io/">Redis</a></li>
-    <li><a href="https://neo4j.com/">Neo4j</a></li>
     <li><a href="https://www.mongodb.com/">MongoDB</a></li>
   </ul>
 </details>
@@ -133,17 +123,17 @@ Maybe you can mention me or this repo in the acknowledgements too
 <summary>DevOps</summary>
   <ul>
     <li><a href="https://www.docker.com/">Docker</a></li>
-    <li><a href="https://www.jenkins.io/">Jenkins</a></li>
-    <li><a href="https://circleci.com/">CircleCLI</a></li>
   </ul>
 </details>
 
 <!-- Features -->
-### :dart: Features
+### :dart: Coming Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- Save articles as NFTs
+- Keep the Articles forever storing them into Decentralized Storage
+- Add comments into the articles
+- Read other owners comments of the same article
+- Resell the articles!
 
 <!-- Color Reference 
 ### :art: Color Reference
@@ -239,7 +229,7 @@ To deploy this project run
 <!-- Usage -->
 ## :eyes: Usage
 
-Use this space to tell a little more about your project and how it can be used. Show additional screenshots, code samples, demos or link to other resources.
+AQUÍ PONER EL GIF/VIDEO DE CÓMO SE USA
 
 
 ```javascript
@@ -253,8 +243,18 @@ function App() {
 <!-- Roadmap -->
 ## :compass: Roadmap
 
-* [x] Todo 1
-* [ ] Todo 2
+* [x] Create plugin browser
+* [x] Get a Read-mode view for articles
+* [x] Save them in Local Browser (temporally storage)
+* [ ] Create an NFT
+* [ ] Improve Read-mode view
+* [ ] Store the content into decentralized storage
+* [ ] Add comments into the article
+* [ ] Read comments from any other article owners
+* [ ] Boost article discussions
+* [ ] Sell articles NFTs to other users
+* [ ] Marketplace for articles
+
 
 
 <!-- Contributing -->
@@ -275,7 +275,7 @@ See `contributing.md` for ways to get started.
 
 Please read the [Code of Conduct](https://github.com/diegotorreslopez81/collect3/blob/master/CODE_OF_CONDUCT.md)
 
-<!-- FAQ -->
+<!-- FAQ 
 ## :grey_question: FAQ
 
 - Question 1
@@ -286,11 +286,12 @@ Please read the [Code of Conduct](https://github.com/diegotorreslopez81/collect3
 
   + Answer 2
 
+-->
 
 <!-- License -->
 ## :warning: License
 
-Distributed under the no License. See LICENSE.txt for more information.
+Distributed under the no License. See LICENSE for more information.
 
 
 <!-- Contact -->
