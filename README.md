@@ -201,7 +201,7 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd my-project/packages/extension
 ```
 
 Install dependencies
@@ -210,12 +210,17 @@ Install dependencies
   yarn install
 ```
 
-Start the server
-
-```bash
-  yarn start
+Then you can build the extension
+```sh
+    yarn build
 ```
+[And finally you can install it this way](https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system/)
 
+or you can execute
+```sh
+    yarn start
+```
+if you are going to make changes to the code
 
 <!-- Deployment -->
 ### :triangular_flag_on_post: Deployment
