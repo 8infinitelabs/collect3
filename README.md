@@ -131,6 +131,7 @@ Maybe you can mention me or this repo in the acknowledgements too
 
 - Save articles as NFTs
 - Keep the Articles forever storing them into Decentralized Storage
+- Share your articles with other users!
 - Add comments into the articles
 - Read other owners comments of the same article
 - Resell the articles!
@@ -249,6 +250,7 @@ function App() {
 * [ ] Create an NFT
 * [ ] Improve Read-mode view
 * [ ] Store the content into decentralized storage
+* [ ] Share your articles!
 * [ ] Add comments into the article
 * [ ] Read comments from any other article owners
 * [ ] Boost article discussions
