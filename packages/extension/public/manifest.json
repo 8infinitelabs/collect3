@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Collect3",
   "version": "0.0.1",
-  "description": "My Chrome Extension",
+  "description": "Plugin to store articles forever in NFT format",
   "icons": {
     "16": "icons/icon_16.png",
     "32": "icons/icon_32.png",
@@ -18,7 +18,6 @@
   },
   "permissions": [
     "storage",
-    "unlimitedStorage",
     "activeTab"
   ],
   "content_scripts": [
