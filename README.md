@@ -84,10 +84,10 @@ Maybe you can mention me or this repo in the acknowledgements too
 
 
 <!-- Screenshots -->
-### :camera: Screenshots
+### :camera: Demo
 
 <div align="center"> 
-  <img src="https://placehold.co/600x400?text=Your+Screenshot+here" alt="screenshot" />
+  <img src="assets/collect3-demo.gif" alt="demo" />
 </div>
 
 
