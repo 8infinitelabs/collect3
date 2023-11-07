@@ -40,10 +40,8 @@ Maybe you can mention me or this repo in the acknowledgements too
    
 <h4>
     <a href="https://collect3.me/">Website</a>
-<!--   <span> · </span>
-    <a href="https://github.com/8infinitelabs/collect3">Documentation</a>
--->
-
+   <span> · </span>
+    <a href="https://chrome.google.com/webstore/detail/collect3/afahgefgimgodpkiapdbjlcchdogfeib">Download beta</a>
   <span> · </span>
     <a href="https://github.com/8infinitelabs/collect3/issues/">Report Bug</a>
   <span> · </span>
