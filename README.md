@@ -82,7 +82,7 @@ Maybe you can mention me or this repo in the acknowledgements too
 <!-- About the Project -->
 ## :star2: About the Project
 
-Collect3 is a browser plugin that empowers users to eternalize digital content like articles or posts using web3 and IPFS technologies. Unlike traditional bookmarks or saved PDFs, Collect3 allows users to mint and store reader-friendly versions of the content on the IPFS, ensuring permanence and true ownership and doc sharing using FVM. This solves the problem of content loss due to website changes, discontinuations, or censorship, offering a robust, decentralized solution for preserving valuable information.
+Collect3 is a browser plugin that empowers users to eternalize digital content like articles or posts using web3 and decentralized storage. Unlike traditional bookmarks or saved PDFs, Collect3 allows users to mint and store reader-friendly versions of the content on the dex storage, ensuring permanence and true ownership and doc sharing. This solves the problem of content loss due to website changes, discontinuations, or censorship, offering a robust, decentralized solution for preserving valuable information.
 
 <!-- Screenshots -->
 ### :camera: Demo
