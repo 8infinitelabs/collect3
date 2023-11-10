@@ -18,36 +18,34 @@ Maybe you can mention me or this repo in the acknowledgements too
   
 <!-- Badges -->
 <p>
-  <a href="https://github.com/diegotorreslopez81/collect3/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/diegotorreslopez81/collect3" alt="contributors" />
+  <a href="https://github.com/8infinitelabs/collect3/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/8infinitelabs/collect3" alt="contributors" />
   </a>
   <a href="">
-    <img src="https://img.shields.io/github/last-commit/diegotorreslopez81/collect3" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/8infinitelabs/collect3" alt="last update" />
   </a>
-  <a href="https://github.com/diegotorreslopez81/collect3/network/members">
-    <img src="https://img.shields.io/github/forks/diegotorreslopez81/collect3" alt="forks" />
+  <a href="https://github.com/8infinitelabs/collect3/network/members">
+    <img src="https://img.shields.io/github/forks/8infinitelabs/collect3" alt="forks" />
   </a>
-  <a href="https://github.com/diegotorreslopez81/collect3/stargazers">
-    <img src="https://img.shields.io/github/stars/diegotorreslopez81/collect3" alt="stars" />
+  <a href="https://github.com/8infinitelabs/collect3/stargazers">
+    <img src="https://img.shields.io/github/stars/8infinitelabs/collect3" alt="stars" />
   </a>
-  <a href="https://github.com/diegotorreslopez81/collect3/issues/">
-    <img src="https://img.shields.io/github/issues/diegotorreslopez81/collect3" alt="open issues" />
+  <a href="https://github.com/8infinitelabs/collect3/issues/">
+    <img src="https://img.shields.io/github/issues/8infinitelabs/collect3" alt="open issues" />
   </a>
-  <a href="https://github.com/diegotorreslopez81/collect3/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/diegotorreslopez81/collect3.svg" alt="license" />
+  <a href="https://github.com/8infinitelabs/collect3/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/8infinitelabs/collect3.svg" alt="license" />
   </a>
 </p>
    
 <h4>
     <a href="https://collect3.me/">Website</a>
-<!--   <span> · </span>
-    <a href="https://github.com/diegotorreslopez81/collect3">Documentation</a>
--->
-
+   <span> · </span>
+    <a href="https://chrome.google.com/webstore/detail/collect3/afahgefgimgodpkiapdbjlcchdogfeib">Download beta</a>
   <span> · </span>
-    <a href="https://github.com/diegotorreslopez81/collect3/issues/">Report Bug</a>
+    <a href="https://github.com/8infinitelabs/collect3/issues/">Report Bug</a>
   <span> · </span>
-    <a href="https://github.com/diegotorreslopez81/collect3/issues/">Request Feature</a>
+    <a href="https://github.com/8infinitelabs/collect3/issues/">Request Feature</a>
   </h4>
 </div>
 
@@ -82,6 +80,7 @@ Maybe you can mention me or this repo in the acknowledgements too
 <!-- About the Project -->
 ## :star2: About the Project
 
+Collect3 is a browser plugin that empowers users to eternalize digital content like articles or posts using web3 and decentralized storage. Unlike traditional bookmarks or saved PDFs, Collect3 allows users to mint and store reader-friendly versions of the content on the dex storage, ensuring permanence and true ownership and doc sharing. This solves the problem of content loss due to website changes, discontinuations, or censorship, offering a robust, decentralized solution for preserving valuable information.
 
 <!-- Screenshots -->
 ### :camera: Demo
@@ -169,39 +168,19 @@ This project uses Yarn as package manager
 ```bash
  npm install --global yarn
 ```
-
-<!-- Installation -->
-### :gear: Installation
-
-Install my-project with npm
-
-```bash
-  yarn install my-project
-  cd my-project
-```
-   
-<!-- Running Tests -->
-### :test_tube: Running Tests
-
-To run tests, run the following command
-
-```bash
-  yarn test test
-```
-
 <!-- Run Locally -->
 ### :running: Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://github.com/diegotorreslopez81/collect3.git
+  git clone https://github.com/8infinitelabs/collect3.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd my-project/packages/extension
 ```
 
 Install dependencies
@@ -210,36 +189,17 @@ Install dependencies
   yarn install
 ```
 
-Start the server
-
-```bash
-  yarn start
+Then you can build the extension
+```sh
+    yarn build
 ```
+[And finally you can install it this way](https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system/)
 
-
-<!-- Deployment -->
-### :triangular_flag_on_post: Deployment
-
-To deploy this project run
-
-```bash
-  yarn deploy
+or you can execute
+```sh
+    yarn start
 ```
-
-
-<!-- Usage -->
-## :eyes: Usage
-
-AQUÍ PONER EL GIF/VIDEO DE CÓMO SE USA
-
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
+if you are going to make changes to the code
 
 <!-- Roadmap -->
 ## :compass: Roadmap
@@ -262,8 +222,8 @@ function App() {
 <!-- Contributing -->
 ## :wave: Contributing
 
-<a href="https://github.com/diegotorreslopez81/collect3/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=diegotorreslopez81/collect3" />
+<a href="https://github.com/8infinitelabs/collect3/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=8infinitelabs/collect3" />
 </a>
 
 
@@ -275,7 +235,7 @@ See `contributing.md` for ways to get started.
 <!-- Code of Conduct -->
 ### :scroll: Code of Conduct
 
-Please read the [Code of Conduct](https://github.com/diegotorreslopez81/collect3/blob/master/CODE_OF_CONDUCT.md)
+Please read the [Code of Conduct](https://github.com/8infinitelabs/collect3/blob/master/CODE_OF_CONDUCT.md)
 
 <!-- FAQ 
 ## :grey_question: FAQ
@@ -301,7 +261,7 @@ Distributed under the no License. See LICENSE for more information.
 
 Diego Torres - [@twitter_handle](https://twitter.com/0xdiegotorres) - diego@infinitelabs.co
 
-Project Link: [https://github.com/diegotorreslopez81/collect3](https://github.com/diegotorreslopez81/collect3)
+Project Link: [https://github.com/8infinitelabs/collect3](https://github.com/8infinitelabs/collect3)
 
 
 <!-- Acknowledgments -->
