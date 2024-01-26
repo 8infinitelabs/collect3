@@ -30,6 +30,17 @@ export async function openArticles() : Promise<chrome.tabs.Tab>  {
   return await chrome.tabs.create({ url, });
 }
 
+export const toDataURL = async (url: string) => {
+  return await fetch(url)
+  .then(response => response.blob())
+  .then(blob => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  }))
+}
+
 export function articleContentToHtml (content: string, title: string) : string {
   const html = `
     <html>
@@ -106,7 +117,7 @@ export function articleContentToHtml (content: string, title: string) : string {
         --light-orange_default-link-color:#0060A9;
         --light-orange_active-link-color:#006CBE;
         }
-        
+
         .ms-fontsize-extraextrasmall {
           font-size: 82%;
         }

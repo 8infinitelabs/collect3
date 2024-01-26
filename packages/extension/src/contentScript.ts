@@ -1,6 +1,6 @@
 'use strict';
 import readability from '@mozilla/readability';
-import { Article } from './utils/utils';
+import { Article, toDataURL } from './utils/utils';
 // Content script file will run in the context of web page.
 // With content script you can manipulate the web pages using
 // Document Object Model (DOM).
@@ -12,9 +12,22 @@ import { Article } from './utils/utils';
 // For more information on Content Scripts,
 // See https://developer.chrome.com/extensions/content_scripts
 
-function getCleanedHtml(): Article | undefined {
+async function getCleanedHtml(): Promise<Article | undefined> {
   try {
     const documentClone = document.cloneNode(true) as Document;
+    const images = documentClone.querySelectorAll("img")
+    for (let i = 0; i < images.length; i++) {
+      const node = images[i];
+      let src = node.src;
+      if (src) {
+        try {
+          const newUrl = await toDataURL(src);
+          node.src = newUrl as string;
+        } catch (err) {
+          console.error("error: ", err);
+        }
+      }
+    }
     const article = new readability.Readability(documentClone).parse();
 
     return article || undefined;
@@ -26,11 +39,13 @@ function getCleanedHtml(): Article | undefined {
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type === 'getHtml') {
-    const data = getCleanedHtml();
-    let response = {
-      article: data,
-      url: window.location.protocol + '//' + window.location.host + window.location.pathname,
-    }
-    sendResponse(response);
+    getCleanedHtml().then((data) => {
+      let response = {
+        article: data,
+        url: window.location.protocol + '//' + window.location.host + window.location.pathname,
+      }
+      sendResponse(response);
+    });
   }
+  return true;
 });

@@ -35,7 +35,6 @@ import { saveArticle, setToStorage } from './utils/storage';
           tabs[0]?.id,
           { type: "getHtml" },
         );
-        console.log("response", response);
         if(response === undefined) {
           console.warn("failed to get article content");
           return undefined;
