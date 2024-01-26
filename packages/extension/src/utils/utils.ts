@@ -20,28 +20,55 @@ export interface Metadata {
   lang: string;
 }
 
-export async function openPreview (path: string) : Promise<chrome.tabs.Tab> {
+export async function openPreview(path: string): Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('preview.html');
   url += `?url=${encodeURIComponent(path)}`
   return await chrome.tabs.create({ url, });
 }
-export async function openArticles() : Promise<chrome.tabs.Tab>  {
+export async function openArticles(): Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('articles.html');
   return await chrome.tabs.create({ url, });
 }
 
 export const toDataURL = async (url: string) => {
   return await fetch(url)
-  .then(response => response.blob())
-  .then(blob => new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-  }))
+    .then(response => response.blob())
+    .then(blob => new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    }))
 }
 
-export function articleContentToHtml (content: string, title: string) : string {
+export const encodeDocumentImages = async (documentClone: Document | HTMLDivElement) => {
+  const images = documentClone.querySelectorAll("img")
+  for (let i = 0; i < images.length; i++) {
+    const node = images[i];
+    let src = node.src;
+    if (src) {
+      try {
+        const newUrl = await toDataURL(src);
+        node.src = newUrl as string;
+        node.srcset = "";
+      } catch (err) {
+        console.error("error: ", err);
+      }
+    }
+  }
+};
+
+export const isBase64 = (base64: string) => {
+  let result = true;
+  try {
+    atob(base64);
+  } catch (err) {
+    result = false;
+  }
+  return result;
+};
+
+export function articleContentToHtml(content: string, title: string): string {
   const html = `
     <html>
       <head>

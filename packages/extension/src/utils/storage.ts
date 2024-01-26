@@ -63,7 +63,7 @@ export async function removeArticles(url: string) : Promise<boolean> {
   return result;
 }
 
-export async function getArticleContent(url: string) {
+export async function getArticleContent(url: string) : Promise<string> {
   return getFromStorage(url);
 }
 

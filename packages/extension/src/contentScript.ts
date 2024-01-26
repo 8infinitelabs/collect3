@@ -1,6 +1,6 @@
 'use strict';
 import readability from '@mozilla/readability';
-import { Article, toDataURL } from './utils/utils';
+import { Article, encodeDocumentImages } from './utils/utils';
 // Content script file will run in the context of web page.
 // With content script you can manipulate the web pages using
 // Document Object Model (DOM).
@@ -15,21 +15,8 @@ import { Article, toDataURL } from './utils/utils';
 async function getCleanedHtml(): Promise<Article | undefined> {
   try {
     const documentClone = document.cloneNode(true) as Document;
-    const images = documentClone.querySelectorAll("img")
-    for (let i = 0; i < images.length; i++) {
-      const node = images[i];
-      let src = node.src;
-      if (src) {
-        try {
-          const newUrl = await toDataURL(src);
-          node.src = newUrl as string;
-        } catch (err) {
-          console.error("error: ", err);
-        }
-      }
-    }
+    await encodeDocumentImages(documentClone);
     const article = new readability.Readability(documentClone).parse();
-
     return article || undefined;
   } catch (error) {
     console.warn('Error parsing document, sending original content');

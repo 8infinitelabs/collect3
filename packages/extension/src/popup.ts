@@ -3,6 +3,7 @@
 import './popup.css';
 import { openPreview, openArticles, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
+import { testHtmlToBase64 } from './utils/migrations';
 
 (function () {
   async function collect() {
@@ -72,7 +73,17 @@ import { saveArticle, setToStorage } from './utils/storage';
     document.getElementById("manageBtn")!.addEventListener("click", () => {
       manageArticles();
     });
+
+    document.getElementById("testBtn")!.addEventListener("click", () => {
+      testHtmlToBase64();
+    });
   }
 
   document.addEventListener("DOMContentLoaded", setupListeners);
+  chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+      if (details.previousVersion === "0.0.1") {
+      }
+    }
+  });
 })();
