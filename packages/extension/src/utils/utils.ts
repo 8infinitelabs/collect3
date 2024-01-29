@@ -42,13 +42,16 @@ export const toDataURL = async (url: string) => {
 }
 
 export const encodeDocumentImages = async (documentClone: Document | HTMLDivElement) => {
+  console.time("encodeDocumentImages");
   const images = documentClone.querySelectorAll("img")
   for (let i = 0; i < images.length; i++) {
     const node = images[i];
     let src = node.src;
     if (src) {
       try {
+        console.time("toDataUrlImage");
         const newUrl = await toDataURL(src);
+        console.timeEnd("toDataUrlImage");
         node.src = newUrl as string;
         node.srcset = "";
       } catch (err) {
@@ -56,6 +59,8 @@ export const encodeDocumentImages = async (documentClone: Document | HTMLDivElem
       }
     }
   }
+  console.log(`encoding ${images.length} images`);
+  console.timeEnd("encodeDocumentImages");
 };
 
 export const isBase64 = (base64: string) => {

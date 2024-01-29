@@ -15,8 +15,11 @@ import { Article, encodeDocumentImages } from './utils/utils';
 async function getCleanedHtml(): Promise<Article | undefined> {
   try {
     const documentClone = document.cloneNode(true) as Document;
+    console.time("encodingImagesOnCreation");
     await encodeDocumentImages(documentClone);
+    console.timeEnd("encodingImagesOnCreation");
     const article = new readability.Readability(documentClone).parse();
+    console.log("article length: ", article?.length);
     return article || undefined;
   } catch (error) {
     console.warn('Error parsing document, sending original content');

@@ -3,6 +3,7 @@
 import './popup.css';
 import { openPreview, openArticles, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
+import { fromHtmlToBase64 } from './utils/migrations';
 
 (function () {
   async function collect() {
@@ -20,7 +21,7 @@ import { saveArticle, setToStorage } from './utils/storage';
           return undefined;
         }
         await saveArticle(response.url, response.article);
-        await openPreview(response.url);
+        //await openPreview(response.url);
       }
     } catch (error) {
       console.error("Error in collect function:", error);
@@ -72,9 +73,9 @@ import { saveArticle, setToStorage } from './utils/storage';
     document.getElementById("manageBtn")!.addEventListener("click", () => {
       manageArticles();
     });
-
     document.getElementById("testBtn")!.addEventListener("click", () => {
-      testHtmlToBase64();
+      console.log("event click on testBtn");
+      fromHtmlToBase64();
     });
   }
 
@@ -82,6 +83,7 @@ import { saveArticle, setToStorage } from './utils/storage';
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
       if (details.previousVersion === "0.0.1") {
+        fromHtmlToBase64();
       }
     }
   });

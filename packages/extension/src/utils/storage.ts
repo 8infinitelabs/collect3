@@ -1,5 +1,6 @@
 import Base64 from "./Base64";
 import { Metadata, Article, articleContentToHtml } from "./utils";
+
 export async function getFromStorage(key: string) : Promise<any> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], function (result) {
@@ -89,10 +90,13 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
     const content = articleContentToHtml(article!.content, article!.title);
+    console.time("encodingHtmlOnCreation");
+    console.log("article html length:", content.length);
+    article.content = Base64.encode(article?.content || '');
+    console.timeEnd("encodingHtmlOnCreation");
     const encodedArticleContent = Base64.encode(content);
     await setArticleContent(
       url,
-      content,
       encodedArticleContent,
     );
   }
