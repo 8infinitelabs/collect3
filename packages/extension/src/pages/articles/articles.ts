@@ -20,7 +20,6 @@ function articleToElement(key: string, article : Metadata) : HTMLLIElement {
   const root = document.createElement("li");
   root.innerHTML = element;
   root.id = key + '-root';
-  console.log('element key', root.id);
   return root;
 }
 
@@ -71,12 +70,10 @@ getArticles().then((articles) => {
       if (key == "articles") {
         const oldValue = new Map(JSON.parse(oldRawValue)) as Map<string, Metadata>;
         const newValue = new Map(JSON.parse(newRawValue)) as Map<string, Metadata>;
-        console.log('oldvalue size', oldValue.size);
-        console.log('newValue size', newValue.size);
         if (oldValue.size == 0) {
           const oldElement = container?.querySelector("#no-element");
           oldElement?.remove();
-        } 
+        }
         if (newValue.size == 0) {
           container!.innerHTML = "";
           noElementMessage(container as Element);
@@ -87,13 +84,9 @@ getArticles().then((articles) => {
             }
           });
         } else {
-          console.log('should delete an article');
-          oldValue.forEach((value, key) => {
-            console.log(value.title);
+          oldValue.forEach((_, key) => {
             if (!newValue.has(key)) {
-              console.log('newValue does not have key');
               const oldElement = document.querySelector(`#${key}-root`);
-              console.log(oldElement);
               oldElement?.remove();
             } else {
               console.log('newValue has key');
@@ -103,5 +96,5 @@ getArticles().then((articles) => {
       }
     }
   });
-  
+
 });

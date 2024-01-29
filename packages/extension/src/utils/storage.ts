@@ -1,3 +1,4 @@
+import Base64 from "./Base64";
 import { Metadata, Article, articleContentToHtml } from "./utils";
 export async function getFromStorage(key: string) : Promise<any> {
   return new Promise((resolve, reject) => {
@@ -88,9 +89,11 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
     const content = articleContentToHtml(article!.content, article!.title);
+    const encodedArticleContent = Base64.encode(content);
     await setArticleContent(
       url,
       content,
+      encodedArticleContent,
     );
   }
 }

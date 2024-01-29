@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Collect3",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Plugin to store articles forever in NFT format",
   "icons": {
     "16": "icons/icon_16.png",
@@ -17,6 +17,7 @@
     "default_popup": "popup.html"
   },
   "permissions": [
+    "unlimitedStorage",
     "storage",
     "activeTab"
   ],

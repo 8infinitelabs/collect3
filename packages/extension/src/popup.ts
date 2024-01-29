@@ -3,7 +3,6 @@
 import './popup.css';
 import { openPreview, openArticles, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
-import { testHtmlToBase64 } from './utils/migrations';
 
 (function () {
   async function collect() {
