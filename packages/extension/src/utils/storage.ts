@@ -89,7 +89,7 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   metadata.length = Math.ceil( numOfWords / wpm );
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
-    const content = articleContentToHtml(article!.content, article!.title);
+    const content = article!.content;
     console.time("encodingHtmlOnCreation");
     console.log("article html length:", content.length);
     article.content = Base64.encode(article?.content || '');

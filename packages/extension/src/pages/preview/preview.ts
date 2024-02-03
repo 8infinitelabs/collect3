@@ -1,6 +1,6 @@
 import "./preview.css";
-import { getArticleContent } from "../../utils/storage";
-import { isBase64 } from "../../utils/utils";
+import { getArticleContent, getArticles } from "../../utils/storage";
+import { articleContentToHtml, isBase64 } from "../../utils/utils";
 import Base64 from "../../utils/Base64";
 
 function setIframeData(data: string) {
@@ -27,13 +27,19 @@ const params = new URLSearchParams(location.search);
 const url = params.get('url');
 
 console.time("getArticleContent")
-getArticleContent(url as string).then((article) => {
+Promise.all([
+  getArticleContent(url as string),
+  getArticles()
+])
+  .then(([article, ArticlesMetadata]) => {
   console.timeEnd("getArticleContent");
+  const metadata = ArticlesMetadata.get(url as string);
   console.time("isBase64");
   let articleContent = article;
   if (isBase64(article)) {
     console.time("decoding");
-    articleContent = Base64.decode(article);
+    const decodedContent = Base64.decode(article);
+    articleContent = articleContentToHtml(decodedContent, metadata?.title || "");
     console.timeEnd("decoding");
   }
   console.timeEnd("isBase64");

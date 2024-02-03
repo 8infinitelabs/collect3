@@ -4,6 +4,11 @@ import Base64 from "./Base64";
 
 type Articles = (string)[][];
 
+const removeTemplateHtml = (content: HTMLDivElement) => {
+  const mainContent = content.querySelector(".entry-content");
+  return mainContent as HTMLDivElement;
+};
+
 export const fromHtmlToBase64 = async () => {
   console.time("fromHtmlToBase64");
   const rawArticles = await getFromStorage('articles');
@@ -17,10 +22,11 @@ export const fromHtmlToBase64 = async () => {
       }
       const container = document.createElement('div');
       container.innerHTML = articleContent;
+      const contentNode = removeTemplateHtml(container);
       console.time("encodingImages");
-      await encodeDocumentImages(container);
+      await encodeDocumentImages(contentNode);
       console.timeEnd("encodingImages");
-      const content = container.innerHTML;
+      const content = contentNode.innerHTML;
       console.time("encodingImages");
       const encodedContent = Base64.encode(content);
       console.timeEnd("encodingImages");
