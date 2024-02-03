@@ -51,9 +51,7 @@ export const encodeDocumentImages = async (documentClone: Document | HTMLDivElem
     let src = node.src;
     if (src) {
       try {
-        console.time("toDataUrlImage");
         const newUrl = await toDataURL(src);
-        console.timeEnd("toDataUrlImage");
         node.src = newUrl as string;
         node.removeAttribute("srcset");
       } catch (err) {

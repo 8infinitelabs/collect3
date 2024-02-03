@@ -90,12 +90,12 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   if (!articles.has(url)) {
     await setArticles(url, metadata as Metadata, articles);
     const content = article!.content;
-    console.time("encodingContentOnCreation");
     console.log("article number of words: ", numOfWords);
     console.log("readtime in minutes: ", metadata.length);
-    article.content = Base64.encode(article?.content || '');
-    console.timeEnd("encodingContentOnCreation");
+    console.time("encodingContentOnCreation");
     const encodedArticleContent = Base64.encode(content);
+    console.timeLog("encodingContentOnCreation");
+    console.timeEnd("encodingContentOnCreation");
     await setArticleContent(
       url,
       encodedArticleContent,

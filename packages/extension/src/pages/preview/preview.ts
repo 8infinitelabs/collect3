@@ -36,13 +36,13 @@ Promise.all([
   const metadata = ArticlesMetadata.get(url as string);
   console.time("isBase64");
   let articleContent = article;
-  if (isBase64(article)) {
+  const articleIsBase64 = isBase64(article);
+  console.timeEnd("isBase64");
+  if (articleIsBase64) {
     console.time("decoding");
     const decodedContent = Base64.decode(article);
-    articleContent = articleContentToHtml(decodedContent, metadata?.title || "");
     console.timeEnd("decoding");
+    articleContent = articleContentToHtml(decodedContent, metadata?.title || "");
   }
-  console.timeEnd("isBase64");
-  console.log("article html length", articleContent.length);
   setIframeData(articleContent);
 });
