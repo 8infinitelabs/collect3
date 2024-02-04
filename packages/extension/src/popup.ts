@@ -73,10 +73,6 @@ import { fromHtmlToBase64 } from './utils/migrations';
     document.getElementById("manageBtn")!.addEventListener("click", () => {
       manageArticles();
     });
-    document.getElementById("testBtn")!.addEventListener("click", () => {
-      console.log("event click on testBtn");
-      fromHtmlToBase64();
-    });
   }
 
   document.addEventListener("DOMContentLoaded", setupListeners);
