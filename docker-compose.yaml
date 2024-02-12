@@ -1,0 +1,26 @@
+version: '3'
+services:
+  s5-node:
+    image: ghcr.io/s5-dev/node:latest
+    volumes:
+      - /s5-config:/config
+    ports:
+      - "5050:5050"
+    restart: unless-stopped
+    network_mode: "host"
+  renterd:
+    image: ghcr.io/siafoundation/renterd:${NETWORK}
+    environment:
+      - RENTERD_SEED=${RENTERD_SEED}
+      - RENTERD_API_PASSWORD=${RENTERD_API_PASSWORD}
+      - RENTERD_S3_ENABLED
+      - RENTERD_S3_KEYPAIRS_V4=${RENTERD_S3_KEYPAIRS_V4}
+    ports:
+      - 9880:9880
+      - 9881:9881
+      - 7070:7070
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    network_mode: "host"
+    stop_grace_period: 5m
