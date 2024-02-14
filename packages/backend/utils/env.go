@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/joho/godotenv"
+	"github.com/mdobak/go-xerrors"
 )
 
 func GetEnvVar(key string) string {
@@ -15,8 +16,7 @@ func GetEnvVar(key string) string {
 
 	if err != nil {
     Logger.Error(
-      err.Error(),
-      GetSlogStackTrace(err),
+      xerrors.WithStackTrace(err, 0).Error(),
     );
     os.Exit(1)
 	}
