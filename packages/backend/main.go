@@ -17,9 +17,51 @@ func main() {
 	router.GET("/ping", ping);
   router.POST("/create_account", CreateAccount);
   router.POST("/upload", UploadFile);
-  router.GET("/download", DownloadFile);
+  router.POST("/download", DownloadFile);
 
-  err := router.Run("localhost:8080");
+  db, err := OpenDB("sqlite3", "./db/local.db")
+  if err != nil {
+    Logger.Error(
+      "Failed To Open DB",
+      slog.String(
+        "Details",
+        err.Error(),
+      ),
+    )
+    os.Exit(1)
+  }
+
+  //this can panic on error
+  db.Migrate()
+
+  user, err := db.GetUserByID(1)
+  if err != nil {
+    Logger.Error(
+      "Failed to get the id 1 account",
+      slog.String(
+        "Details",
+        err.Error(),
+      ),
+    )
+    os.Exit(1)
+  }
+
+  if user == (User{}) {
+    //s5-node admin account
+    err = db.CreateUser(User{ID: 1, UID: "admin"})
+    if err != nil {
+      Logger.Error(
+        "Failed to create the id 1 account",
+        slog.String(
+          "Details",
+          err.Error(),
+        ),
+      )
+      os.Exit(1)
+    }
+  }
+
+  err = router.Run("localhost:8080");
 	if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
