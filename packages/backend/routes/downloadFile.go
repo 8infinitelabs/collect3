@@ -4,7 +4,6 @@ import (
   "fmt"
 	"net/http"
   "io"
-  //"encoding/json"
   "log/slog"
   . "collect3/backend/utils"
 
@@ -13,7 +12,7 @@ import (
 )
 
 type DownloadFilePayload struct {
-  Cid string `json:"cid"`;
+  CID string `json:"cid"`;
   AuthToken string `json:"auth_token"`;
 }
 
@@ -30,7 +29,7 @@ func DownloadFile(c *gin.Context) {
     return;
   }
 
-  url := fmt.Sprintf("http://localhost:5050/s5/download/%s?auth_token=%s", payload.Cid, payload.AuthToken);
+  url := fmt.Sprintf("http://localhost:5050/s5/download/%s?auth_token=%s", payload.CID, payload.AuthToken);
   req, err := http.NewRequest(http.MethodGet, url, nil);
   if err != nil {
     Logger.Error(
@@ -69,9 +68,7 @@ func DownloadFile(c *gin.Context) {
   defer res.Body.Close();
 
   file, err := io.ReadAll(res.Body);
-  
 
-  //err = json.NewDecoder(res.Body).Decode(&response);
   if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
@@ -80,6 +77,5 @@ func DownloadFile(c *gin.Context) {
     return
   }
 
-  //c.JSON(http.StatusOK, gin.H{"cid": response.Cid});
   c.String(http.StatusAccepted, string(file));
 }

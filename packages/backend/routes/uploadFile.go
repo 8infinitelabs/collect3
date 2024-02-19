@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bytes"
-	. "collect3/backend/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,18 +10,20 @@ import (
 	"net/http"
 	"net/textproto"
 	"strings"
+  . "collect3/backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mdobak/go-xerrors"
 )
 
 type UploadFilePayload struct {
+  UID       string `json:"uid"`
 	AuthToken string `json:"auth_token"`
 	File      string `json:"file"`
 }
 
 type UploadFileResponse struct {
-	Cid string `json:"cid"`
+	CID string `json:"cid"`
 }
 
 func UploadFile(c *gin.Context) {
@@ -134,6 +135,19 @@ func UploadFile(c *gin.Context) {
 		c.String(res.StatusCode, "Something Went Wrong")
 		return
 	}
+  
+  err = DB.UploadContent(payload.UID, response.CID);
+  if err != nil {
+		Logger.Error(
+      "Failed To Insert CID In DB",
+      slog.String(
+        "Details",
+        xerrors.WithStackTrace(err, 0).Error(),
+      ),
+		)
+		c.String(http.StatusInternalServerError, "Something Went Wrong")
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{"cid": response.Cid})
+	c.JSON(http.StatusOK, gin.H{"cid": response.CID})
 }
