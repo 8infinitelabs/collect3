@@ -12,17 +12,16 @@ import (
   "github.com/mdobak/go-xerrors"
 )
 
-type CreateAccountPayload struct {
+type CreateTokenPayload struct {
 	UID string `json:"uid"`;
 }
 
-type CreateAccountResponse struct {
-	Id int64 `json:"id"`
+type CreateTokenResponse struct {
+  AuthToken string `json:"auth_token"`
 }
 
-func CreateAccount(c *gin.Context) {
+func CreateToken(c *gin.Context) {
   var payload CreateAccountPayload;
-  var response CreateAccountResponse;
   var tokenResponse CreateTokenResponse
   s5Key := GetEnvVar("ADMIN_S5_KEY")
 
@@ -35,79 +34,26 @@ func CreateAccount(c *gin.Context) {
 		return;
 	}
 
-  var url = fmt.Sprintf(
-    "http://localhost:5050/s5/admin/accounts?email=%s@hotmail.com",
-    payload.UID,
+  user, err := DB.GetUserByUID(payload.UID) 
+  if err != nil {
+    Logger.Error(
+      xerrors.WithStackTrace(err, 0).Error(),
+    )
+    c.String(http.StatusInternalServerError, "Something Went Wrong")
+    return
+  }
+  if user == (User{}) {
+    c.String(http.StatusNotFound, "User Not Found")
+    return
+  }
+
+  //Getting the auth token
+  url := fmt.Sprintf(
+    "http://localhost:5050/s5/admin/accounts/new_auth_token?id=%d",
+    user.ID,
   );
 
   req, err := http.NewRequest(http.MethodPost, url, nil);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusInternalServerError, "Failed To Create Account");
-		return;
-	}
-
-  req.Header.Add(
-    "Authorization",
-    fmt.Sprintf(
-      "Bearer %s",
-      s5Key,
-    ),
-  );
-  res, err := http.DefaultClient.Do(req);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusInternalServerError, "Failed To Create Account");
-		return;
-	}
-
-  if res.StatusCode != http.StatusOK {
-    defer res.Body.Close()
-		bodyBytes, err := io.ReadAll(res.Body)
-		var bodyString = ""
-		if err == nil {
-			bodyString = string(bodyBytes)
-		}
-		Logger.Error(
-			fmt.Sprintf("Failed To Create Account, Status %d", res.StatusCode),
-			slog.Any(
-				"StackTrace",
-				xerrors.WithStackTrace(
-					xerrors.New("Error"),
-					0,
-				).Error(),
-			),
-			slog.String(
-				"Response.Body",
-				bodyString,
-			),
-		)
-    c.String(res.StatusCode, "Something Went Wrong");
-    fmt.Println(res);
-    return;
-  }
-  
-  err = json.NewDecoder(res.Body).Decode(&response)
-	if err != nil {
-		Logger.Error(
-			xerrors.WithStackTrace(err, 0).Error(),
-		)
-		c.String(res.StatusCode, "Something Went Wrong")
-		return
-	}
-
-
-  //Getting the auth token
-  url = fmt.Sprintf(
-    "http://localhost:5050/s5/admin/accounts/new_auth_token?id=%d",
-    response.Id,
-  );
-
-  req, err = http.NewRequest(http.MethodPost, url, nil);
   if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
@@ -123,7 +69,7 @@ func CreateAccount(c *gin.Context) {
       s5Key,
     ),
   );
-  res, err = http.DefaultClient.Do(req);
+  res, err := http.DefaultClient.Do(req);
   if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
@@ -167,16 +113,7 @@ func CreateAccount(c *gin.Context) {
 		return
 	}
 
-  err = DB.CreateUser(response.Id, payload.UID, tokenResponse.AuthToken);
-  fmt.Println()
-  fmt.Println()
-  fmt.Println()
-  fmt.Println()
-  fmt.Println("Auth token: ", tokenResponse.AuthToken)
-  fmt.Println()
-  fmt.Println()
-  fmt.Println()
-  fmt.Println()
+  err = DB.UpdateToken(user.ID, tokenResponse.AuthToken);
   if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
@@ -185,5 +122,5 @@ func CreateAccount(c *gin.Context) {
     return
   }
 
-  c.JSON(http.StatusOK, gin.H{"id": response.Id, "auth_token": tokenResponse.AuthToken})
+  c.JSON(http.StatusOK, gin.H{"id": user.ID, "auth_token": tokenResponse.AuthToken})
 }

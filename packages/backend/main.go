@@ -14,8 +14,10 @@ import (
 func main() {
   slog.SetDefault(Logger)
 	router := gin.Default();
+  //TODO: Handle properly the 401 errors
 	router.GET("/ping", ping);
   router.POST("/create_account", CreateAccount);
+  router.POST("/create_token", CreateToken);
   router.POST("/upload", UploadFile);
   router.POST("/download", DownloadFile);
 
@@ -48,7 +50,7 @@ func main() {
 
   if user == (User{}) {
     //s5-node admin account
-    err = db.CreateUser(User{ID: 1, UID: "admin"})
+    err = db.CreateUser(1, "admin", "")
     if err != nil {
       Logger.Error(
         "Failed to create the id 1 account",
