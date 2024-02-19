@@ -1,15 +1,27 @@
 version: '3'
 services:
   s5-node:
+    depends_on:
+      renterd:
+        #change to service_healthy
+        condition: service_started
     image: ghcr.io/s5-dev/node:latest
     volumes:
       - /s5-config:/config
-      - /db/accounts
+      - /db/accounts:/s5-db/
     ports:
       - "5050:5050"
     restart: unless-stopped
     network_mode: "host"
   renterd:
+    #chek how to do a good healthcheck for renterd
+    #healthcheck:
+    #test: ["CMD-SHELL", "curl -f http://localhost:9880/ || exit 1"]
+    #interval: 1ms
+    #timeout: 10s
+    #retries: 3
+    #start_period: 10s
+    #start_interval: 5s
     image: ghcr.io/siafoundation/renterd:${NETWORK}
     environment:
       - RENTERD_SEED=${RENTERD_SEED}
