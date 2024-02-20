@@ -10,7 +10,6 @@ const removeTemplateHtml = (content: HTMLDivElement) => {
 };
 
 export const fromHtmlToBase64 = async () => {
-  console.time("fromHtmlToBase64");
   const rawArticles = await getFromStorage('articles');
   try {
     const articles: Articles = JSON.parse(rawArticles);
@@ -23,21 +22,14 @@ export const fromHtmlToBase64 = async () => {
       const container = document.createElement('div');
       container.innerHTML = articleContent;
       const contentNode = removeTemplateHtml(container);
-      console.time("encodingImages");
       await encodeDocumentImages(contentNode);
-      console.timeEnd("encodingImages");
       const content = contentNode.innerHTML;
-      console.time("encodingImages");
       const encodedContent = Base64.encode(content);
-      console.timeEnd("encodingImages");
-      console.time("settingStorage");
       await setToStorage(
         id,
         encodedContent
       );
-      console.timeEnd("settingStorage");
     }
-    console.timeEnd("fromHtmlToBase64");
   } catch (err) {
     console.log("err: ", err);
   }

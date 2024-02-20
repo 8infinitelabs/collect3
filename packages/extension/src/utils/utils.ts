@@ -44,7 +44,6 @@ export const toDataURL = async (url: string) => {
 }
 
 export const encodeDocumentImages = async (documentClone: Document | HTMLDivElement) => {
-  console.time("encodeDocumentImages");
   const images = documentClone.querySelectorAll("img")
   for (let i = 0; i < images.length; i++) {
     const node = images[i];
@@ -59,8 +58,6 @@ export const encodeDocumentImages = async (documentClone: Document | HTMLDivElem
       }
     }
   }
-  console.log(`encoding ${images.length} images`);
-  console.timeEnd("encodeDocumentImages");
 };
 
 export const isBase64 = (base64: string) => {

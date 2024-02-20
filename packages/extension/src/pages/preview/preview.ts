@@ -4,44 +4,34 @@ import { articleContentToHtml, isBase64 } from "../../utils/utils";
 import Base64 from "../../utils/Base64";
 
 function setIframeData(data: string) {
-  console.time("setIframeData");
   const iframeContainer = document.querySelector("body > div > div")
   const iframe = document.createElement("iframe");
   iframe.id = "collected-content";
 
-  console.time("creating html blob");
   const blob = new Blob(
     [data],
     {type: "text/html"}
   );
-  console.timeEnd("creating html blob");
 
   iframe.src = window.URL.createObjectURL(blob);
 
   iframeContainer!.innerHTML = "";
   iframeContainer!.appendChild(iframe);
-  console.timeEnd("setIframeData");
 }
 
 const params = new URLSearchParams(location.search);
 const url = params.get('url');
 
-console.time("getArticleContent")
 Promise.all([
   getArticleContent(url as string),
   getArticles()
 ])
   .then(([article, ArticlesMetadata]) => {
-  console.timeEnd("getArticleContent");
   const metadata = ArticlesMetadata.get(url as string);
-  console.time("isBase64");
   let articleContent = article;
   const articleIsBase64 = isBase64(article);
-  console.timeEnd("isBase64");
   if (articleIsBase64) {
-    console.time("decoding");
     const decodedContent = Base64.decode(article);
-    console.timeEnd("decoding");
     articleContent = articleContentToHtml(decodedContent, metadata?.title || "");
   }
   setIframeData(articleContent);

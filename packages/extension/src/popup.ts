@@ -16,12 +16,12 @@ import { fromHtmlToBase64 } from './utils/migrations';
           { type: "getHtml" },
         );
         console.log("response", response);
-        if(response === undefined) {
+        if (response === undefined) {
           console.warn("failed to get article content");
           return undefined;
         }
         await saveArticle(response.url, response.article);
-        //await openPreview(response.url);
+        await openPreview(response.url);
       }
     } catch (error) {
       console.error("Error in collect function:", error);
