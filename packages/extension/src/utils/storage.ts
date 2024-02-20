@@ -32,36 +32,102 @@ export async function removeFromStorage(key: string) : Promise<void> {
     });
   });
 }
+async function initializeStorage() {
+  const defaultStorage : Storage = {
+    url: DEFAULT_API as string,
+    alias: DEFAULT,
+    deleted: false,
+    shouldSync: false,
+  };
+  await setToStorage(
+    ACTIVE_STORAGE,
+    JSON.stringify(
+      defaultStorage,
+    ),
+  );
+  delete defaultStorage.shouldSync;
+  await setToStorage(
+    STORAGE_OPTIONS,
+    JSON.stringify(
+      [defaultStorage],
+    ),
+  );
+}
 
-export async function getActiveStorage() : Promise<string> {
+export async function getActiveStorage() : Promise<Storage> {
   let current = await getFromStorage(ACTIVE_STORAGE);
   if (!current) {
-    const defaultStorage : Storage = {
+    await initializeStorage();
+    return {
       url: DEFAULT_API as string,
       alias: DEFAULT,
       deleted: false,
+      shouldSync: false,
     };
-    await setToStorage(
-      ACTIVE_STORAGE,
-      JSON.stringify(
-        defaultStorage,
-      ),
-    );
-    await setToStorage(
-      STORAGE_OPTIONS,
-      JSON.stringify(
-        [defaultStorage],
-      ),
-    );
-    return defaultStorage.url;
   }
   let activeStorage: Storage = JSON.parse(current);
-  return activeStorage.url;
+  return activeStorage;
+}
+
+export async function getStorageOptions() : Promise<Storage[]> {
+  let rawOptions = await getFromStorage(STORAGE_OPTIONS);
+  if (!rawOptions) {
+    await initializeStorage();
+    rawOptions = await getFromStorage(STORAGE_OPTIONS);
+  }
+  const options: Storage[] = JSON.parse(rawOptions);
+  return options;
+}
+
+export async function createStorageOption(url: string, alias: string) : Promise<boolean> {
+  const options = await getStorageOptions();
+  const exist = options.find((s) => {
+    const optionUrl = new URL(s.url);
+    const newUrl = new URL(url);
+      return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname;
+  });
+  const newStorage : Storage = {
+    url,
+    alias,
+    deleted: false,
+  };
+  if (exist) {
+    return false;
+  }
+  options.push(newStorage);
+  await setToStorage(
+    STORAGE_OPTIONS,
+    JSON.stringify(
+      options,
+    ),
+  );
+  return true;
+}
+
+export async function changeActiveStorage(url: string) : Promise<void> {
+  const options = await getStorageOptions();
+  const exist = options.find((s) => {
+    const optionUrl = new URL(s.url);
+    const newUrl = new URL(url);
+      return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname;
+  });
+
+  if (!exist) {
+    return;
+  }
+
+  exist.shouldSync = false;
+  await setToStorage(
+    ACTIVE_STORAGE,
+    JSON.stringify(
+      exist,
+    ),
+  );
 }
 
 export async function getArticles(): Promise<Map<string, Metadata>> {
   const key = await getActiveStorage();
-  let articles = await getFromStorage(key);
+  let articles = await getFromStorage(key.url);
   if (!articles) {
     return new Map();
   } else {
@@ -75,7 +141,7 @@ export async function setArticles(url: string, data: Metadata, articles: Map<str
   if (!articles.has(url)) {
     articles.set(url, data);
     await setToStorage(
-      key,
+      key.url,
       JSON.stringify(
         Array.from(
           articles.entries(),
@@ -91,7 +157,7 @@ export async function removeArticles(url: string) : Promise<boolean> {
   const key = await getActiveStorage();
   if (result) {
     await setToStorage(
-      key,
+      key.url,
       JSON.stringify(
         Array.from(
           articles.entries(),

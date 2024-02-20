@@ -26,6 +26,7 @@ export interface Storage {
   alias: string;
   url: string;
   deleted: boolean;
+  shouldSync?: boolean;
 }
 
 export const ACTIVE_STORAGE = 'active_storage';

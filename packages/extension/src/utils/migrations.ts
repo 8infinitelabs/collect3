@@ -18,13 +18,13 @@ const removeTemplateHtml = (content: HTMLDivElement) => {
 export const fromLocalOnlyToMultipleRemotes = async () => {
   const key = await getActiveStorage();
   const rawArticles = await getFromStorage('articles');
-  await setToStorage(key, rawArticles);
+  await setToStorage(key.url, rawArticles);
   await removeFromStorage('articles');
 }
 
 export const fromHtmlToBase64 = async () => {
   const key = await getActiveStorage();
-  const rawArticles = await getFromStorage(key);
+  const rawArticles = await getFromStorage(key.url);
   try {
     const articles: Articles = JSON.parse(rawArticles);
     for (let i = 0; i < articles.length; i++) {
