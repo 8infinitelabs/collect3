@@ -1,5 +1,13 @@
 import Base64 from "./Base64";
-import { Metadata, Article, articleContentToHtml } from "./utils";
+import {
+  Metadata,
+  Article,
+  Storage,
+  ACTIVE_STORAGE,
+  DEFAULT_API,
+  DEFAULT,
+  STORAGE_OPTIONS,
+} from "./utils";
 
 export async function getFromStorage(key: string) : Promise<any> {
   return new Promise((resolve, reject) => {
@@ -25,8 +33,35 @@ export async function removeFromStorage(key: string) : Promise<void> {
   });
 }
 
+export async function getActiveStorage() : Promise<string> {
+  let current = await getFromStorage(ACTIVE_STORAGE);
+  if (!current) {
+    const defaultStorage : Storage = {
+      url: DEFAULT_API as string,
+      alias: DEFAULT,
+      deleted: false,
+    };
+    await setToStorage(
+      ACTIVE_STORAGE,
+      JSON.stringify(
+        defaultStorage,
+      ),
+    );
+    await setToStorage(
+      STORAGE_OPTIONS,
+      JSON.stringify(
+        [defaultStorage],
+      ),
+    );
+    return defaultStorage.url;
+  }
+  let activeStorage: Storage = JSON.parse(current);
+  return activeStorage.url;
+}
+
 export async function getArticles(): Promise<Map<string, Metadata>> {
-  let articles = await getFromStorage('articles');
+  const key = await getActiveStorage();
+  let articles = await getFromStorage(key);
   if (!articles) {
     return new Map();
   } else {
@@ -36,10 +71,11 @@ export async function getArticles(): Promise<Map<string, Metadata>> {
 }
 
 export async function setArticles(url: string, data: Metadata, articles: Map<string, Metadata>) {
+  const key = await getActiveStorage();
   if (!articles.has(url)) {
     articles.set(url, data);
     await setToStorage(
-      'articles',
+      key,
       JSON.stringify(
         Array.from(
           articles.entries(),
@@ -52,9 +88,10 @@ export async function setArticles(url: string, data: Metadata, articles: Map<str
 export async function removeArticles(url: string) : Promise<boolean> {
   const articles = await getArticles();
   const result = articles.delete(url);
+  const key = await getActiveStorage();
   if (result) {
     await setToStorage(
-      'articles',
+      key,
       JSON.stringify(
         Array.from(
           articles.entries(),

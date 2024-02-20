@@ -22,6 +22,17 @@ export interface Metadata {
   lang: string;
 }
 
+export interface Storage {
+  alias: string;
+  url: string;
+  deleted: boolean;
+}
+
+export const ACTIVE_STORAGE = 'active_storage';
+export const STORAGE_OPTIONS = 'storage_options';
+export const DEFAULT_API = process.env.DEFAULT_STORAGE_API;
+export const DEFAULT = 'default'
+
 export async function openPreview(path: string): Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('preview.html');
   url += `?url=${encodeURIComponent(path)}`

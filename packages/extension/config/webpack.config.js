@@ -1,6 +1,7 @@
 'use strict';
 
 const { merge } = require('webpack-merge');
+const Dotenv = require('dotenv-webpack');
 
 const common = require('./webpack.common.js');
 const PATHS = require('./paths');
@@ -15,6 +16,12 @@ const config = (env, argv) =>
       preview: PATHS.src + '/pages/preview/preview.ts',
       articles: PATHS.src + '/pages/articles/articles.ts',
     },
+    plugins: [
+      new Dotenv({
+        path: PATHS.src + '/../.env',
+        safe: true,
+      }),
+    ],
     devtool: argv.mode === 'production' ? false : 'source-map',
   });
 

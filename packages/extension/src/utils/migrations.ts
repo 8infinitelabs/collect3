@@ -1,4 +1,10 @@
-import { getArticleContent, getFromStorage, setToStorage } from "./storage";
+import {
+  getActiveStorage,
+  getArticleContent,
+  getFromStorage,
+  removeFromStorage,
+  setToStorage,
+} from "./storage";
 import { encodeDocumentImages, isBase64 } from "./utils";
 import Base64 from "./Base64";
 
@@ -9,8 +15,16 @@ const removeTemplateHtml = (content: HTMLDivElement) => {
   return mainContent as HTMLDivElement;
 };
 
-export const fromHtmlToBase64 = async () => {
+export const fromLocalOnlyToMultipleRemotes = async () => {
+  const key = await getActiveStorage();
   const rawArticles = await getFromStorage('articles');
+  await setToStorage(key, rawArticles);
+  await removeFromStorage('articles');
+}
+
+export const fromHtmlToBase64 = async () => {
+  const key = await getActiveStorage();
+  const rawArticles = await getFromStorage(key);
   try {
     const articles: Articles = JSON.parse(rawArticles);
     for (let i = 0; i < articles.length; i++) {
@@ -34,3 +48,4 @@ export const fromHtmlToBase64 = async () => {
     console.log("err: ", err);
   }
 };
+
