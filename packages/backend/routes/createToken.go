@@ -20,37 +20,12 @@ type CreateTokenResponse struct {
   AuthToken string `json:"auth_token"`
 }
 
-func CreateToken(c *gin.Context) {
-  var payload CreateAccountPayload;
+func FetchNewToken (id int64, c *gin.Context) (string, error) {
   var tokenResponse CreateTokenResponse
   s5Key := GetEnvVar("ADMIN_S5_KEY")
-
-	err := c.BindJSON(&payload);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusBadRequest, "Invalid Request Body");
-		return;
-	}
-
-  user, err := DB.GetUserByUID(payload.UID) 
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusInternalServerError, "Something Went Wrong")
-    return
-  }
-  if user == (User{}) {
-    c.String(http.StatusNotFound, "User Not Found")
-    return
-  }
-
-  //Getting the auth token
   url := fmt.Sprintf(
     "http://localhost:5050/s5/admin/accounts/new_auth_token?id=%d",
-    user.ID,
+    id,
   );
 
   req, err := http.NewRequest(http.MethodPost, url, nil);
@@ -59,7 +34,7 @@ func CreateToken(c *gin.Context) {
       xerrors.WithStackTrace(err, 0).Error(),
     )
     c.String(http.StatusInternalServerError, "Failed To Create Auth Token");
-		return;
+    return "", err;
 	}
 
   req.Header.Add(
@@ -75,7 +50,7 @@ func CreateToken(c *gin.Context) {
       xerrors.WithStackTrace(err, 0).Error(),
     )
     c.String(http.StatusInternalServerError, "Failed To Create Auth Token");
-		return;
+		return "", err;
 	}
 
   if res.StatusCode != http.StatusOK {
@@ -101,7 +76,7 @@ func CreateToken(c *gin.Context) {
 		)
     c.String(res.StatusCode, "Something Went Wrong");
     fmt.Println(res);
-    return;
+    return "", err;
   }
 
   err = json.NewDecoder(res.Body).Decode(&tokenResponse)
@@ -110,17 +85,46 @@ func CreateToken(c *gin.Context) {
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
 		c.String(res.StatusCode, "Something Went Wrong")
-		return
+    return "", err
 	}
+  return tokenResponse.AuthToken, nil
+}
 
-  err = DB.UpdateToken(user.ID, tokenResponse.AuthToken);
+func CreateToken(c *gin.Context) {
+  var payload CreateAccountPayload;
+
+	err := c.BindJSON(&payload);
   if err != nil {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
     )
-    c.String(res.StatusCode, "Something Went Wrong")
+    c.String(http.StatusBadRequest, "Invalid Request Body");
+		return;
+	}
+
+  user, err := DB.GetUserByUID(payload.UID) 
+  if err != nil {
+    Logger.Error(
+      xerrors.WithStackTrace(err, 0).Error(),
+    )
+    c.String(http.StatusInternalServerError, "Something Went Wrong")
+    return
+  }
+  if user == (User{}) {
+    c.String(http.StatusNotFound, "User Not Found")
     return
   }
 
-  c.JSON(http.StatusOK, gin.H{"id": user.ID, "auth_token": tokenResponse.AuthToken})
+  token, _ := FetchNewToken(user.ID, c)
+
+  err = DB.UpdateToken(user.ID, token);
+  if err != nil {
+    Logger.Error(
+      xerrors.WithStackTrace(err, 0).Error(),
+    )
+    c.String(http.StatusInternalServerError, "Something Went Wrong")
+    return
+  }
+
+  c.JSON(http.StatusOK, gin.H{"id": user.ID, "auth_token": token})
 }
