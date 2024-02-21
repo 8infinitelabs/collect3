@@ -1,7 +1,7 @@
 'use strict';
 
 import './popup.css';
-import { openPreview, openArticles, articleContentToHtml, Article } from './utils/utils';
+import { openPreview, openPage, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
 import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrations';
 
@@ -55,7 +55,15 @@ import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrat
 
   async function manageArticles() {
     try {
-      await openArticles();
+      await openPage('articles.html');
+    } catch (error) {
+      console.error("Error in manageArticles function:", error);
+    }
+  }
+
+  async function manageStorage() {
+    try {
+      await openPage('storage.html');
     } catch (error) {
       console.error("Error in manageArticles function:", error);
     }
@@ -72,6 +80,10 @@ import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrat
 
     document.getElementById("manageBtn")!.addEventListener("click", () => {
       manageArticles();
+    });
+
+    document.getElementById("storageBtn")!.addEventListener("click", () => {
+      manageStorage();
     });
   }
 

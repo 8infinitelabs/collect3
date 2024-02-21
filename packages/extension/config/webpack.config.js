@@ -12,9 +12,9 @@ const config = (env, argv) =>
     entry: {
       popup: PATHS.src + '/popup.ts',
       contentScript: PATHS.src + '/contentScript.ts',
-      background: PATHS.src + '/background.ts',
       preview: PATHS.src + '/pages/preview/preview.ts',
       articles: PATHS.src + '/pages/articles/articles.ts',
+      storage: PATHS.src + '/pages/storage/storagePage.ts',
     },
     plugins: [
       new Dotenv({
