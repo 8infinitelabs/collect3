@@ -3,7 +3,6 @@
 import './popup.css';
 import { openPreview, openPage, articleContentToHtml, Article } from './utils/utils';
 import { saveArticle, setToStorage } from './utils/storage';
-import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrations';
 
 (function () {
   async function collect() {
@@ -92,7 +91,7 @@ import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrat
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
       if (details.previousVersion === "0.0.1") {
-        chrome.runtime.sendMessage('toBase64');
+        chrome.runtime.sendMessage({type: 'toBase64'});
       }
     }
   });
