@@ -33,6 +33,7 @@ export const ACTIVE_STORAGE = 'active_storage';
 export const STORAGE_OPTIONS = 'storage_options';
 export const DEFAULT_API = process.env.DEFAULT_STORAGE_API;
 export const DEFAULT = 'default'
+export const ID_KEY = 'UID_KEY';
 
 export async function openPreview(path: string): Promise<chrome.tabs.Tab> {
   let url = chrome.runtime.getURL('preview.html');

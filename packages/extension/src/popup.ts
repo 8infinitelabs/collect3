@@ -92,7 +92,7 @@ import { fromHtmlToBase64, fromLocalOnlyToMultipleRemotes } from './utils/migrat
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
       if (details.previousVersion === "0.0.1") {
-        fromLocalOnlyToMultipleRemotes().then(fromHtmlToBase64)
+        chrome.runtime.sendMessage('toBase64');
       }
     }
   });

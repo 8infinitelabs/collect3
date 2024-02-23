@@ -81,7 +81,7 @@ export async function getStorageOptions() : Promise<Storage[]> {
 
 export async function createStorageOption(url: string, alias: string) : Promise<boolean> {
   const options = await getStorageOptions();
-  const exist = options.find((s) => {
+  const exist = options.findIndex((s) => {
     const optionUrl = new URL(s.url);
     const newUrl = new URL(url);
       return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname;
@@ -91,10 +91,11 @@ export async function createStorageOption(url: string, alias: string) : Promise<
     alias,
     deleted: false,
   };
-  if (exist) {
-    return false;
+  if (exist === -1) {
+    options.push(newStorage);
+  } else {
+    options[exist] = newStorage;
   }
-  options.push(newStorage);
   await setToStorage(
     STORAGE_OPTIONS,
     JSON.stringify(
@@ -104,7 +105,31 @@ export async function createStorageOption(url: string, alias: string) : Promise<
   return true;
 }
 
-export async function changeActiveStorage(url: string) : Promise<void> {
+export async function deleteStorageOption(url: string) {
+  if (url === DEFAULT_API) {
+    return;
+  }
+  const options = await getStorageOptions();
+  const active = await getActiveStorage();
+
+  const toDelete = options.findIndex((v) => {
+    return v.url == url;
+  });
+
+  if (url === active.url) {
+    await changeActiveStorage(DEFAULT_API as string, false);
+  }
+
+  if (toDelete === -1) {
+    return;
+  }
+
+  options[toDelete].deleted = true;
+
+  await setToStorage(STORAGE_OPTIONS, JSON.stringify(options));
+};
+
+export async function changeActiveStorage(url: string, sync: boolean) : Promise<void> {
   const options = await getStorageOptions();
   const exist = options.find((s) => {
     const optionUrl = new URL(s.url);
@@ -116,7 +141,7 @@ export async function changeActiveStorage(url: string) : Promise<void> {
     return;
   }
 
-  exist.shouldSync = false;
+  exist.shouldSync = sync;
   await setToStorage(
     ACTIVE_STORAGE,
     JSON.stringify(

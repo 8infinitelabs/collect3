@@ -2,7 +2,7 @@
   "name": "collect3",
   "version": "0.0.1",
   "main": "index.js",
-  "repository": "https://github.com/diegotorreslopez81/collect3.git",
+  "repository": "git@github.com:8infinitelabs/collect3.git",
   "author": "",
   "license": "MIT",
   "devDependencies": {

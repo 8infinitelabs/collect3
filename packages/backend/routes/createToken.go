@@ -87,6 +87,8 @@ func FetchNewToken (id int64, c *gin.Context) (string, error) {
 		c.String(res.StatusCode, "Something Went Wrong")
     return "", err
 	}
+  //TODO: use a proper domain
+  c.SetCookie("user", tokenResponse.AuthToken, 30 * 24 * 60 * 60, "/", "localhost", false, true)
   return tokenResponse.AuthToken, nil
 }
 

@@ -15,6 +15,7 @@ const config = (env, argv) =>
       preview: PATHS.src + '/pages/preview/preview.ts',
       articles: PATHS.src + '/pages/articles/articles.ts',
       storage: PATHS.src + '/pages/storage/storagePage.ts',
+      background: PATHS.src + '/background.ts',
     },
     plugins: [
       new Dotenv({

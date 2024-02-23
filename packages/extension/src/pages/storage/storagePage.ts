@@ -1,8 +1,9 @@
 import "./storage.css";
-import { getActiveStorage, getStorageOptions, listenToStorage } from "../../utils/storage";
-import { Storage, STORAGE_OPTIONS } from "../../utils/utils";
+import { changeActiveStorage, createStorageOption, deleteStorageOption, getActiveStorage, getStorageOptions, listenToStorage } from "../../utils/storage";
+import { ACTIVE_STORAGE, Storage, STORAGE_OPTIONS } from "../../utils/utils";
 
 let activeStorage;
+let reducedmotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 function storageToElement(option : Storage, isActive: boolean) : HTMLLIElement {
   const element = `
     <div class="article-header">
@@ -12,8 +13,7 @@ function storageToElement(option : Storage, isActive: boolean) : HTMLLIElement {
       ${option.url}
     </p>
     <div>
-      <span>in ${option.deleted}</span>
-      <span>isActive ${isActive}</span>
+      ${isActive? "<span class=\"isActive\">isActive</span>": ""}
     </div>
     <button
       title="click to make active"
@@ -49,12 +49,74 @@ function noElementMessage(container: Element) {
   container.appendChild(root);
 }
 
+const form: HTMLFormElement | null = document.querySelector("#create-storage-option")
+if (form) {
+  form.addEventListener('submit', async function (e:Event) {
+    e.preventDefault()
+    const aliasInput: HTMLInputElement | null = form[0] as HTMLInputElement;
+    const urlInput: HTMLInputElement | null = form[1] as HTMLInputElement;
+    if (!aliasInput.value.trim()) {
+      console.log("alias empty");
+      return
+    }
+    let url: URL;
+    try {
+      url = new URL(urlInput.value)
+    } catch (err) {
+      console.log(err)
+      return err;
+    }
+
+    const result = await createStorageOption(url.toString(), aliasInput.value.trim());
+    console.log('result: ', result);
+  })
+}
+
+const deleteStorage = async (id: string) => {
+  const url = id.replace('-root', '');
+  await deleteStorageOption(url);
+
+};
+
+let deleteButtonCallback: (e: Event) => Promise<void>;
+if (reducedmotion) {
+  deleteButtonCallback = async (e: Event) => {
+    const target = e.target as Element;
+    (target?.parentNode as Element).remove();
+    await deleteStorage(target.id);
+  }
+} else {
+  deleteButtonCallback = async (e: Event) => {
+    const target = e.target as Element;
+    (target?.parentNode as HTMLElement).style.transition = '1s';
+    (target?.parentNode as Element).className = 'todelete';
+    await deleteStorage(target.id);
+  };
+}
+
+const makeMainCallback = (container: Element | null, url: string) => {
+  return async () => {
+    const activeNode = container?.querySelector('.isActive');
+    activeNode?.remove();
+    const node = container?.querySelector(`[id='${url}-root']`);
+    const child = node?.querySelector(':nth-child(3)');
+    const newChild = document.createElement('span');
+    newChild.textContent = "isActive";
+    newChild.className = "isActive";
+    child?.appendChild(newChild);
+    await changeActiveStorage(url, true);
+  }
+};
+
 Promise.all([
   getActiveStorage(),
   getStorageOptions(),
 ]).then(([activeStorage, options]) => {
   const container = document.querySelector(".fullclick");
   const elements = options.map((option) => {
+    if (option.deleted) {
+      return null;
+    }
     const element = storageToElement(
       option,
       option.url === activeStorage.url,
@@ -63,22 +125,7 @@ Promise.all([
     return element;
   });
   if (options.length) {
-    let callback: (e: Event) => void;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      callback = (e: Event) => {
-        const target = e.target as Element;
-        (target?.parentNode as Element).remove();
-          //deleteArticle(target.id);
-      }
-      //container?.addEventListener('click',       });
-    } else {
-      callback = (e: Event) => {
-        const target = e.target as Element;
-        (target?.parentNode as HTMLElement).style.transition = '1s';
-        (target?.parentNode as Element).className = 'todelete';
-          //deleteArticle(target.id);
-      };
-      //container?.addEventListener('click', e => { });
+    if (!reducedmotion) {
       container?.addEventListener('transitionend', e => {
         const target = e.target as Element;
         if (target.classList.contains('todelete')) {
@@ -87,21 +134,26 @@ Promise.all([
       });
     }
     elements.forEach((el, i) => {
+      if (!el) {
+        return el;
+      }
       const makeMainButton = el.querySelector('.main');
       const deleteButton = el.querySelector('.delete-button');
       const option = options[i];
 
-      deleteButton?.addEventListener('click', callback);
-      makeMainButton?.addEventListener('click', () => console.log('new main ', option.url));
+      deleteButton?.addEventListener('click', deleteButtonCallback);
+      makeMainButton?.addEventListener('click', makeMainCallback(container, option.url));
     });
   } else {
     if (container) noElementMessage(container);
   }
+
   listenToStorage((changes) => {
     for (let [key, { oldValue: oldRawValue, newValue: newRawValue }] of Object.entries(changes)) {
       if (key == STORAGE_OPTIONS) {
         const oldValue = JSON.parse(oldRawValue) as Storage[];
         const newValue = JSON.parse(newRawValue) as Storage[];
+
         if (oldValue.length == 0) {
           const oldElement = container?.querySelector("#no-element");
           oldElement?.remove();
@@ -112,18 +164,40 @@ Promise.all([
           noElementMessage(container as Element);
           return;
         }
-        if (oldValue.length < newValue.length) {
+        let deletedItem = false;
+        oldValue.forEach((old) => {
+          if (old.deleted) {
+            newValue.forEach((recent) => {
+              if (recent.url == old.url && !recent.deleted) {
+                deletedItem = true;
+              }
+            })
+          }
+        });
+        const shouldAddNode = (oldValue.length < newValue.length) || deletedItem;
+        if (shouldAddNode) {
           newValue.forEach((value) => {
             const exist = oldValue.find((option) => {
-              return option.url == value.url;
+              const isTheSame = option.url == value.url;
+              if (!isTheSame) {
+                return false;
+              }
+              if (option.deleted && !value.deleted) {
+                return false;
+              }
+              return true;
             });
             if (!exist) {
-              container?.appendChild(
-                storageToElement(
-                  value,
-                  false,
-                ),
+              const el = storageToElement(
+                value,
+                false,
               );
+              const makeMainButton = el.querySelector('.main');
+              const deleteButton = el.querySelector('.delete-button');
+
+              deleteButton?.addEventListener('click', deleteButtonCallback);
+              makeMainButton?.addEventListener('click', makeMainCallback(container, value.url));
+              container?.appendChild(el);
             }
           });
           return;
@@ -133,13 +207,21 @@ Promise.all([
               return option.url == value.url;
             });
           if (!exist) {
-            const oldElement = document.querySelector(`#${value.url}-root`);
+            const oldElement = document.querySelector(`[id='${value.url}-root']`);
             oldElement?.remove();
           }
         });
+      } else if (key == ACTIVE_STORAGE) {
+        const newValue = JSON.parse(newRawValue) as Storage;
+        const activeNode = container?.querySelector('.isActive');
+        activeNode?.remove();
+        const node = container?.querySelector(`[id='${newValue.url}-root']`);
+        const child = node?.querySelector(':nth-child(3)');
+        const newChild = document.createElement('span');
+        newChild.textContent = "isActive";
+        newChild.className = "isActive";
+        child?.appendChild(newChild);
       }
-
     }
   });
-
 });
