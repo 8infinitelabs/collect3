@@ -150,6 +150,41 @@ export async function changeActiveStorage(url: string, sync: boolean) : Promise<
   );
 }
 
+export async function setAuthToken(storage: Storage, auth_token: string) : Promise<void> {
+  const options = await getStorageOptions();
+  const active = await getActiveStorage();
+  const storageUrl = new URL(storage.url);
+  const activeUrl = new URL(active.url);
+  const index = options.findIndex((s) => {
+    const optionUrl = new URL(s.url);
+      return optionUrl.host == storageUrl.host && optionUrl.pathname == storageUrl.pathname;
+  });
+
+  if (index === -1) {
+    return;
+  }
+
+  if (activeUrl.host == storageUrl.host && activeUrl.pathname == storageUrl.pathname) {
+    await setToStorage(
+      ACTIVE_STORAGE,
+      JSON.stringify(
+        {
+          ...storage,
+          auth_token
+        },
+      ),
+    );
+  }
+
+  options[index].auth_token = auth_token;
+  await setToStorage(
+    STORAGE_OPTIONS,
+    JSON.stringify(
+      options,
+    ),
+  );
+}
+
 export async function getArticles(): Promise<Map<string, Metadata>> {
   const key = await getActiveStorage();
   let articles = await getFromStorage(key.url);
@@ -164,6 +199,24 @@ export async function getArticles(): Promise<Map<string, Metadata>> {
 export async function setArticles(url: string, data: Metadata, articles: Map<string, Metadata>) {
   const key = await getActiveStorage();
   if (!articles.has(url)) {
+    articles.set(url, data);
+    await setToStorage(
+      key.url,
+      JSON.stringify(
+        Array.from(
+          articles.entries(),
+        ),
+      ),
+    );
+  }
+}
+
+export async function setArticleCID(cid: string, url: string) {
+  const key = await getActiveStorage();
+  const articles = await getArticles();
+  const data = articles.get(url);
+  if (data) {
+    data!.cid = cid;
     articles.set(url, data);
     await setToStorage(
       key.url,

@@ -20,6 +20,7 @@ export interface Metadata {
   dir: string;
   siteName: string;
   lang: string;
+  cid?: string;
 }
 
 export interface Storage {
@@ -27,6 +28,7 @@ export interface Storage {
   url: string;
   deleted: boolean;
   shouldSync?: boolean;
+  auth_token?: string;
 }
 
 export const ACTIVE_STORAGE = 'active_storage';

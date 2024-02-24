@@ -85,6 +85,10 @@ func CreateAccount(c *gin.Context) {
 				bodyString,
 			),
 		)
+    if (bodyString == "This email address is already in use by another account on this node") {
+      c.String(http.StatusConflict, "Account Already Exist")
+      return;
+    }
     c.String(res.StatusCode, "Something Went Wrong");
     fmt.Println(res);
     return;
@@ -95,7 +99,7 @@ func CreateAccount(c *gin.Context) {
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
-		c.String(res.StatusCode, "Something Went Wrong")
+		c.String(res.StatusCode, "Failed To Create Account")
 		return
 	}
 
@@ -106,7 +110,7 @@ func CreateAccount(c *gin.Context) {
     Logger.Error(
       xerrors.WithStackTrace(err, 0).Error(),
     )
-    c.String(http.StatusInternalServerError, "Something Went Wrong")
+    c.String(http.StatusInternalServerError, "Failed To Write To DB")
     return
   }
 

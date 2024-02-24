@@ -84,6 +84,7 @@ import { saveArticle, setToStorage } from './utils/storage';
     document.getElementById("storageBtn")!.addEventListener("click", () => {
       manageStorage();
     });
+    chrome.runtime.sendMessage({type: 'createAccount'});
   }
 
   document.addEventListener("DOMContentLoaded", setupListeners);

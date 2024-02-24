@@ -1,25 +1,114 @@
 import { v4 as secure } from '@lukeed/uuid/secure';
-import { getFromStorage, setToStorage } from './storage';
-import { ID_KEY, Metadata } from './utils';
+import { getActiveStorage, getFromStorage, setArticleCID, setAuthToken, setToStorage } from './storage';
+import { ID_KEY, Metadata, Storage } from './utils';
 
 export const createUserUid = async () => {
   const id = secure();
   await setToStorage(ID_KEY, id)
-};
-
-export const getUserUid = async () => {
-  const id = await getFromStorage(ID_KEY);
   return id;
 };
 
-export const uploadFile = async (file: string, metadata: Metadata) => {
-  const auth_token = "S5ApryAPz........"
+export const getUserUid = async () => {
+  let id = await getFromStorage(ID_KEY);
+  if (!id) {
+    id = createUserUid();
+  }
+  return id;
+};
+
+export const accountExist = async (uid: string, activeStorage: Storage): Promise<boolean> => {
+  const raw = await fetch(`${activeStorage?.url}account_exist`, {
+    method: 'POST',
+    body: JSON.stringify({
+      uid,
+    }),
+  });
+  const response: {exist: boolean} = await raw.json();
+  return response.exist;
+};
+
+export const createAccount = async (activeStorage?: Storage, userUID?: string) => {
+  let uid: string;
+  if (userUID ) {
+    uid = userUID ;
+  } else {
+    uid = await getUserUid();
+  }
+  let storage: Storage;
+  if (activeStorage) {
+    storage = activeStorage;
+  } else {
+    storage = await getActiveStorage();
+  }
+  const raw = await fetch(`${activeStorage?.url}create_account`, {
+    method: "POST",
+    body: JSON.stringify({
+      uid,
+    }),
+  });
+  const response: {id: string, auth_token: string} = await raw.json();
+  await setAuthToken(storage, response.auth_token);
+  return response;
+}
+
+export const createToken = async (activeStorage?: Storage, userUID?: string) => {
+  let uid: string;
+  if (userUID) {
+    uid = userUID ;
+  } else {
+    uid = await getUserUid();
+  }
+  let storage: Storage;
+  if (activeStorage) {
+    storage = activeStorage;
+  } else {
+    storage = await getActiveStorage();
+  }
+  const raw = await fetch(`${storage.url}create_token`, {
+    method: "POST",
+    body: JSON.stringify({
+      uid,
+    }),
+  });
+  const response: {auth_token: string} = await raw.json();
+  await setAuthToken(storage, response.auth_token);
+  return response;
+}
+
+export const getOrCreateToken = async (activeStorage: Storage): Promise<string> => {
+  const uid = await getUserUid();
+  let auth_token: string;
+  const exist = await accountExist(uid, activeStorage);
+  if (exist) {
+    const result = await createToken(activeStorage, uid)
+    auth_token = result.auth_token;
+  } else {
+    const result = await createAccount(activeStorage);
+    auth_token = result.auth_token;
+  }
+  return auth_token;
+};
+
+export const uploadFile = async (id: string,file: string, metadata: Metadata, activeStorage?: Storage) => {
+  let storage: Storage;
+  if (activeStorage) {
+    storage = activeStorage;
+  } else {
+    storage = await getActiveStorage();
+  }
+
+  let auth_token: string
+  if (!storage.auth_token) {
+    auth_token = await getOrCreateToken(storage);
+  } else {
+    auth_token = storage.auth_token;
+  }
   const content = {
     ...metadata,
+    url: id,
     content: file,
   }
-  //TODO: change to cookies
-  const raw = await fetch("http://localhost:8080/upload", {
+  const raw = await fetch(`${storage.url}upload`, {
     method: "POST",
     body: JSON.stringify({
       file: JSON.stringify(content),
@@ -27,41 +116,29 @@ export const uploadFile = async (file: string, metadata: Metadata) => {
     }),
   });
   const response: {cid: string} = await raw.json()
-
-  //TODO: save cid
+  setArticleCID(response.cid, id);
+  return response;
 };
 
-export const downloadFile = async (cid: string) => {
-  //TODO: change to cookies or credentials api
-  const auth_token = "S5ApryAPz........"
-  const raw = await fetch("http://localhost:8080/download", {
+export const downloadFile = async (cid: string, activeStorage?: Storage) => {
+  let storage: Storage;
+  if (activeStorage) {
+    storage = activeStorage;
+  } else {
+    storage = await getActiveStorage();
+  }
+  let auth_token: string
+  if (!storage.auth_token) {
+    auth_token = await getOrCreateToken(storage);
+  } else {
+    auth_token = storage.auth_token;
+  }
+  const raw = await fetch(`${storage.url}download`, {
     method: "POST",
     body: JSON.stringify({
       cid,
       auth_token,
     }),
   });
-  //TODO: parse and save file
+  return await (await (raw.blob())).text();
 };
-
-export const createAccount = async () => {
-  const uid = await getUserUid();
-  const raw = await fetch("http://localhost:8080/create_account", {
-    method: "POST",
-    body: JSON.stringify({
-      uid,
-    }),
-  });
-  const response: {id: string, auth_token: string} = await raw.json();
-}
-
-export const createToken = async () => {
-  const uid = await getUserUid();
-  const raw = await fetch("http://localhost:8080/create_token", {
-    method: "POST",
-    body: JSON.stringify({
-      uid,
-    }),
-  });
-  const response: {auth_token: string} = await raw.json();
-}
