@@ -7,8 +7,8 @@ services:
         condition: service_started
     image: ghcr.io/s5-dev/node:latest
     volumes:
-      - /s5-config:/config
-      - /db/accounts:/s5-db/
+      - /config:/config
+      - ./db:/db
     ports:
       - "5050:5050"
     restart: unless-stopped

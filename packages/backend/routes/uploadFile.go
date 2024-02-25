@@ -122,6 +122,11 @@ func UploadFile(c *gin.Context) {
 		)
 		if res.StatusCode == 400 {
 			c.String(res.StatusCode, "This File May Already Exist")
+      return
+		}
+    if res.StatusCode == http.StatusUnauthorized {
+			c.String(res.StatusCode, "Invalid Token")
+      return
 		}
 		c.String(res.StatusCode, "Something Went Wrong")
 		return

@@ -105,6 +105,7 @@ export const uploadFile = async (id: string,file: string, metadata: Metadata, ac
   }
   const content = {
     ...metadata,
+    cid: undefined,
     url: id,
     content: file,
   }
@@ -115,6 +116,12 @@ export const uploadFile = async (id: string,file: string, metadata: Metadata, ac
       auth_token,
     }),
   });
+  if (raw.status === 401) {
+    throw new Error("Invalid Token");
+  }
+  if (raw.status !== 200) {
+    throw new Error("Something Went Wrong");
+  }
   const response: {cid: string} = await raw.json()
   setArticleCID(response.cid, id);
   return response;
@@ -140,5 +147,11 @@ export const downloadFile = async (cid: string, activeStorage?: Storage) => {
       auth_token,
     }),
   });
+  if (raw.status === 401) {
+    throw new Error("Invalid Token");
+  }
+  if (raw.status !== 200) {
+    throw new Error("Something Went Wrong");
+  }
   return await (await (raw.blob())).text();
 };

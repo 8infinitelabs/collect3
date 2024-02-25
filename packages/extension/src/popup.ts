@@ -45,7 +45,7 @@ import { saveArticle, setToStorage } from './utils/storage';
           key,
           content,
         );
-        await openPreview('preview');
+        await openPreview(key);
       }
     } catch (error) {
       console.error("Error in preview function:", error);
@@ -84,6 +84,8 @@ import { saveArticle, setToStorage } from './utils/storage';
     document.getElementById("storageBtn")!.addEventListener("click", () => {
       manageStorage();
     });
+
+    console.log('sending createAccountEvent');
     chrome.runtime.sendMessage({type: 'createAccount'});
   }
 

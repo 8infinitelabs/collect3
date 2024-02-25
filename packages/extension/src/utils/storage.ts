@@ -268,14 +268,24 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   // 255 is the word per minute constant
   const wpm = 255;
   metadata.length = Math.ceil( numOfWords / wpm );
-  if (!articles.has(url)) {
-    await setArticles(url, metadata as Metadata, articles);
-    const content = article!.content;
-    const encodedArticleContent = Base64.encode(content);
-    await setArticleContent(
-      url,
-      encodedArticleContent,
-    );
+  if (articles.has(url)) {
+    return;
+  }
+  await setArticles(url, metadata as Metadata, articles);
+  const encodedArticleContent = Base64.encode(article!.content);
+  await setArticleContent(
+    url,
+    encodedArticleContent,
+  );
+
+  const storage = await getActiveStorage();
+  if (storage.shouldSync) {
+    chrome.runtime.sendMessage({
+      type: 'sync',
+      payload: {
+        url,
+      },
+    });
   }
 }
 
