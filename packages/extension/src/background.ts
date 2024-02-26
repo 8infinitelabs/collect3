@@ -60,26 +60,24 @@ chrome.runtime.onMessage.addListener((
     };
     upload();
   }
-  if (request.type === 'syncAll') {
+  if (request.type === 'syncStorage') {
     const upload = async () => {
       try {
         const storage = await getActiveStorage();
+        if (!storage.shouldSync) {
+          return;
+        }
         const rawArticles = await getFromStorage(storage.url);
         const articles: [[string,Metadata]] = JSON.parse(rawArticles);
-        const requests = articles.map(async ([url, metadata]) => {
-          const file = await getArticleContent(url);
-          return uploadFile(url, file, metadata as Metadata, storage)
+        const filteredArticles = articles.filter(([_, metadata]) => {
+          return !metadata.cid;
         });
-
-        const results = await Promise.allSettled(requests);
-        console.log(results);
-
-        sendResponse({
-          message:'Done',
-          payload: {
-            cids: results,
-          },
-        })
+        for (let i = 0; i < filteredArticles.length; i++) {
+          const [url, metadata] = filteredArticles[i];
+          const file = await getArticleContent(url);
+          await uploadFile(url, file, metadata as Metadata, storage);
+        }
+        sendResponse({message:'Done'})
       } catch (err) {
         console.log(err);
         sendResponse({message:'Error'})

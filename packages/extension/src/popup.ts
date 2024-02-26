@@ -87,6 +87,7 @@ import { saveArticle, setToStorage } from './utils/storage';
 
     console.log('sending createAccountEvent');
     chrome.runtime.sendMessage({type: 'createAccount'});
+    chrome.runtime.sendMessage({type: 'syncStorage'});
   }
 
   document.addEventListener("DOMContentLoaded", setupListeners);
