@@ -204,7 +204,7 @@ func (db *SQLiteRepository) CreateContent(cid string) (error) {
 }
 
 func (db *SQLiteRepository) CreateUserContent(id int64, cid string) (error) {
-	res, err := db.db.Exec("INSERT INTO user_content(id, cid) values(?,?)", id, cid)
+	res, err := db.db.Exec("INSERT INTO user_content(user_id, content_cid) values(?,?)", id, cid)
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) {

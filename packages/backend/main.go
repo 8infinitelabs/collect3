@@ -1,11 +1,11 @@
 package main
 
 import (
+	. "collect3/backend/routes"
+	. "collect3/backend/utils"
+	"log/slog"
 	"net/http"
-  "log/slog"
-  "os"
-  . "collect3/backend/routes"
-  . "collect3/backend/utils"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mdobak/go-xerrors"

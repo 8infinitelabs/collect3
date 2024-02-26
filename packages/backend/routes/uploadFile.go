@@ -8,8 +8,6 @@ import (
 	"log/slog"
 	"mime/multipart"
 	"net/http"
-	"net/textproto"
-	"strings"
   . "collect3/backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -31,27 +29,7 @@ func UploadFile(c *gin.Context) {
 	var response UploadFileResponse
 	var body bytes.Buffer
 	var err error
-	metadata := `{"name": "filename.c3"}`
-	metadataHeader := textproto.MIMEHeader{}
-	metadataHeader.Set("Content-Type", "application/json; charset=UTF-8")
-
-	writer := multipart.NewWriter(&body)
-	metadataPart, err := writer.CreatePart(metadataHeader)
-	if err != nil {
-		Logger.Error(
-			xerrors.WithStackTrace(err, 0).Error(),
-		)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
-	}
-	_, err = metadataPart.Write([]byte(metadata))
-	if err != nil {
-		Logger.Error(
-			xerrors.WithStackTrace(err, 0).Error(),
-		)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
-	}
+  var writer *multipart.Writer
 
 	err = c.BindJSON(&payload)
 	if err != nil {
@@ -59,33 +37,29 @@ func UploadFile(c *gin.Context) {
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
 		c.String(http.StatusBadRequest, "Invalid Request Body")
-		// c.AbortWithError(http.StatusBadRequest, err);
 		return
 	}
-
-	file := strings.NewReader(payload.File)
-	fileHeader := textproto.MIMEHeader{}
-	fileHeader.Set("Content-Type", "text/c3; charset=UTF-8")
-	filePart, err := writer.CreatePart(fileHeader)
+  writer = multipart.NewWriter(&body)
+  part, err := writer.CreateFormFile("file", "article.txt")
 	if err != nil {
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
+		c.String(http.StatusInternalServerError, "Failed to Parse File")
 		return
 	}
-	_, err = io.Copy(filePart, file)
-	if err != nil {
+  _, err = io.Copy(part, bytes.NewBufferString(payload.File))
+  if err != nil {
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
+		c.String(http.StatusInternalServerError, "Failed to Read File")
 		return
 	}
 	writer.Close()
 
 	url := fmt.Sprintf("http://localhost:5050/s5/upload?auth_token=%s", payload.AuthToken)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body.Bytes()))
+	req, err := http.NewRequest(http.MethodPost, url, &body)
 	if err != nil {
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
@@ -93,10 +67,7 @@ func UploadFile(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Failed To Upload File")
 		return
 	}
-	//contentType := fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary());
-	//req.Header.Set("Content-Type", contentType)
-  //Content-Length must be the total number of bytes in the request body.
-	//req.Header.Set("Content-Length", fmt.Sprintf("%d", body.Len()))
+  req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -137,7 +108,7 @@ func UploadFile(c *gin.Context) {
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
 		)
-		c.String(res.StatusCode, "Something Went Wrong")
+		c.String(res.StatusCode, "Failed to read response")
 		return
 	}
   

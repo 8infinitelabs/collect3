@@ -2,13 +2,13 @@ import { v4 as secure } from '@lukeed/uuid/secure';
 import { getActiveStorage, getFromStorage, setArticleCID, setAuthToken, setToStorage } from './storage';
 import { ID_KEY, Metadata, Storage } from './utils';
 
-export const createUserUid = async () => {
+export const createUserUid = async (): Promise<string> => {
   const id = secure();
   await setToStorage(ID_KEY, id)
   return id;
 };
 
-export const getUserUid = async () => {
+export const getUserUid = async (): Promise<string> => {
   let id = await getFromStorage(ID_KEY);
   if (!id) {
     id = createUserUid();
@@ -90,6 +90,7 @@ export const getOrCreateToken = async (activeStorage: Storage): Promise<string> 
 };
 
 export const uploadFile = async (id: string,file: string, metadata: Metadata, activeStorage?: Storage) => {
+  const uid = await getUserUid();
   let storage: Storage;
   if (activeStorage) {
     storage = activeStorage;
@@ -114,6 +115,7 @@ export const uploadFile = async (id: string,file: string, metadata: Metadata, ac
     body: JSON.stringify({
       file: JSON.stringify(content),
       auth_token,
+      uid,
     }),
   });
   if (raw.status === 401) {
