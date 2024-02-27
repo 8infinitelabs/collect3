@@ -3,8 +3,8 @@ services:
   s5-node:
     depends_on:
       renterd:
-        #change to service_healthy
-        condition: service_started
+        condition: service_healthy
+        #condition: service_started
     image: ghcr.io/s5-dev/node:latest
     volumes:
       - /config:/config
@@ -14,15 +14,14 @@ services:
     restart: unless-stopped
     network_mode: "host"
   renterd:
-    #chek how to do a good healthcheck for renterd
-    #healthcheck:
-    #test: ["CMD-SHELL", "curl -f http://localhost:9880/ || exit 1"]
-    #interval: 1ms
-    #timeout: 10s
-    #retries: 3
-    #start_period: 10s
-    #start_interval: 5s
-    image: ghcr.io/siafoundation/renterd:${NETWORK}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9880/api/bus/accounts -u \":${RENTERD_API_PASSWORD}\" || exit 1"]
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 3
+    build: 
+      context: .
+      dockerfile: Dockerfile
     environment:
       - RENTERD_SEED=${RENTERD_SEED}
       - RENTERD_API_PASSWORD=${RENTERD_API_PASSWORD}
