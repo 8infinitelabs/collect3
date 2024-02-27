@@ -239,36 +239,40 @@ func (db * SQLiteRepository) UploadContent(uid string, cid string) error {
   if content == (Content{}) {
     err = db.CreateContent(cid);
     if err != nil {
-      return err
+      if !errors.Is(err, ErrDuplicate) {
+        return err
+      }
     }
   }
   err = db.CreateUserContent(user.ID, cid);
   return err
 }
 
-//func (r *SQLiteRepository) GetByName(name string) (*Website, error) {
-//	row := r.db.QueryRow("SELECT * FROM websites WHERE name = ?", name)
-//	var website Website
-//	if err := row.Scan(&website.ID, &website.Name, &website.URL, &website.Rank); err != nil {
-//		if errors.Is(err, sql.ErrNoRows) {
-//			return nil, ErrNotExists
-//		}
-//		return nil, err
-//	}
-//	return &website, nil
-//}
-//
-//func (r *SQLiteRepository) Delete(id int64) error {
-//	res, err := r.db.Exec("DELETE FROM websites WHERE id = ?", id)
-//	if err != nil {
-//		return err
-//	}
-//	rowsAffected, err := res.RowsAffected()
-//	if err != nil {
-//		return err
-//	}
-//	if rowsAffected == 0 {
-//		return ErrDeleteFailed
-//	}
-//	return err
-//}
+func (db * SQLiteRepository) UnlinkContent(uid string, cid string) error {
+  var err error
+
+  user, err := db.GetUserByUID(uid)
+  if err != nil {
+    return err
+  }
+
+  if user == (User{}) {
+    return ErrNotExists
+  }
+  
+	res, err := db.db.Exec("DELETE FROM user_content WHERE user_id=? AND content_cid=?", user.ID, cid)
+
+  if  err != nil {
+    return err
+  }
+
+  rowsAffected, err := res.RowsAffected()
+  if  err != nil {
+    return err
+  }
+
+  if rowsAffected == 0 {
+    return ErrDeleteFailed
+  }
+  return nil
+}

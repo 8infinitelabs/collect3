@@ -21,6 +21,7 @@ func main() {
   router.POST("/create_token", CreateToken);
   router.POST("/upload", UploadFile);
   router.POST("/download", DownloadFile);
+  router.POST("/delete", DeleteForUser);
 
   db, err := OpenDB("sqlite3", "./db/local.db")
   if err != nil {
