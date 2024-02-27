@@ -2,13 +2,14 @@ package routes
 
 import (
 	"bytes"
+	. "collect3/backend/utils"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
-  . "collect3/backend/utils"
+  "errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mdobak/go-xerrors"
@@ -114,6 +115,10 @@ func UploadFile(c *gin.Context) {
   
   err = DB.UploadContent(payload.UID, response.CID);
   if err != nil {
+    if errors.Is(err, ErrDuplicate) {
+	    c.JSON(http.StatusOK, gin.H{"cid": response.CID})
+      return
+    }
 		Logger.Error(
       "Failed To Insert CID In DB",
       slog.String(
