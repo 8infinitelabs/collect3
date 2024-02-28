@@ -1,0 +1,45 @@
+# ! Documentation: https://docs.sfive.net/install/config
+
+#choose a name
+name = "my-s5-node"
+
+#set a seed, you can use the one generated automatically in the node
+[keypair]
+seed = "seed"
+
+[cache] # Caches file objects that are uploaded, streamed or downloaded
+path = "/cache"
+maxSizeInGB = 4
+
+[database] # Caches peer and object data (small)
+path = "/db"
+
+[http.api]
+port = 5050
+bind = '0.0.0.0'
+
+[p2p.peers]
+initial = [
+  'wss://z2DWuWNZcdSyZLpXFK2uCU3haaWMXrDAgxzv17sDEMHstZb@s5.garden/s5/p2p',
+  'wss://z2DWuPbL5pweybXnEB618pMnV58ECj2VPDNfVGm3tFqBvjF@s5.ninja/s5/p2p',
+]
+
+[store.s3]
+bucket = "sfive" #"sfive" # Or just "default"
+endpointUrl = "http://localhost:7070" #if you followed the Sia renterd testnet guide
+accessKey = "your access key" # Replace this with the access key from your .env
+secretKey = "your secret key" # Replace this with the secret key from your .env
+
+[accounts]
+enabled = true
+alwaysAllowedScopes = [
+  'account/login',
+  'account/register',
+  's5/registry/read',
+  's5/metadata',
+  's5/debug/storage_locations',
+  's5/debug/download_urls',
+  's5/blob/redirect',
+]
+[accounts.database]
+path = "/db/accounts"

@@ -163,11 +163,13 @@ To run this project, you will need to add the following environment variables to
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
 
-This project uses Yarn as package manager
+* Go 1.21
+* Yarn
+* Node
+* Docker-Compose
+* Sqlite3
+* [renterd](https://docs.sia.tech/renting/setting-up-renterd) (this is only used to generate the config)
 
-```bash
- npm install --global yarn
-```
 <!-- Run Locally -->
 ### :running: Run Locally
 
@@ -180,14 +182,73 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd my-project/packages/extension
+  cd collect3/
 ```
 
-Install dependencies
+Create a renterd config file
+```bash
+  renterd config
+```
+make sure to select yes when asked if you want to configure the s3 settings.
 
+With this information you can create the .env file following the example in the root directoryof the project,
+now the next step will be running
+
+```bash
+  docker-compose up -d
+```
+you can open the renterd dashboard in your browser and configure your node.
+once all is done you can configure the s5 node, first check the container name with
+
+```bash
+  docker-compose ps
+```
+
+now that you know the name you can copy the s5 config from the container
+```bash
+  docker-compose cp <s5-container-name>:/config/config.toml ./temp.toml
+```
+after that you can use the s5-config-example.toml to modify the temp.toml and copy the file back to the container
+```bash
+  docker-compose cp ./temp.toml <s5-container-name>:/config/config.toml
+```
+and then restart the container
+```bash
+  docker-compose restart <container-name>
+```
+now, you need to do one last thing before moving away from the containers
+```bash
+  docker-compose logs <s5-container-name>
+```
+look for the ADMIN API KEY and copy it, this is the key you will need for the next step
+
+```bash
+  cd packages/backend
+```
+here you will use the key from the previous step to create the .env following the example file.
+
+the next step is creating the database file
+
+```bash
+  sqlite3 db/local.db
+```
+
+after that you can install the backend dependencies
+```bash
+  go mod tidy
+```
+
+now moving to the extension
+```bash
+  cd ../extension
+```
+
+we can start by installing the dependencies
 ```bash
   yarn install
 ```
+
+Copy the contents of the .env.example and create your .env
 
 Then you can build the extension
 ```sh
@@ -199,7 +260,17 @@ or you can execute
 ```sh
     yarn start
 ```
-if you are going to make changes to the code
+if you are going to make changes to the code.
+
+and for the backend you can user [air](https://github.com/cosmtrek/air) for development or just run
+```bash
+  go run main.go
+```
+
+for production you can compile it and run the executable that you will find in the build folder
+```bash
+  go build ./
+```
 
 <!-- Roadmap -->
 ## :compass: Roadmap
