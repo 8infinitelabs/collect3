@@ -169,6 +169,7 @@ To run this project, you will need to add the following environment variables to
 * Docker-Compose
 * Sqlite3
 * [renterd](https://docs.sia.tech/renting/setting-up-renterd) (this is only used to generate the config)
+* gcc
 
 <!-- Run Locally -->
 ### :running: Run Locally
@@ -272,6 +273,13 @@ for production you can compile it and run the executable that you will find in t
   go build ./
 ```
 
+## Common Problems
+
+### undefined: sqlite3.Error
+ if you face this error where sqlite3 is undefinded you need to set this env variable
+ ```
+   CGO_ENABLED=1
+ ```
 <!-- Roadmap -->
 ## :compass: Roadmap
 
