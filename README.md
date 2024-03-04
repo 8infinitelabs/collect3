@@ -280,6 +280,7 @@ for production you can compile it and run the executable that you will find in t
  ```
    CGO_ENABLED=1
  ```
+ and make sure you have installed gcc
 <!-- Roadmap -->
 ## :compass: Roadmap
 
