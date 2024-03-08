@@ -1,21 +1,19 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	//carThings "github.com/ipld/go-car/v2"
-	BlockStore "github.com/ipld/go-car/v2/blockstore"
-	//"github.com/multiformats/go-multihash"
-	"github.com/ipfs/go-cid"
-	//"github.com/multiformats/go-multicodec"
-	"bytes"
+	"path"
+
 	blocks "github.com/ipfs/go-block-format"
+	"github.com/ipfs/go-cid"
 	"github.com/ipfs/go-unixfsnode/data/builder"
+	BlockStore "github.com/ipld/go-car/v2/blockstore"
 	dagpb "github.com/ipld/go-codec-dagpb"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
-	"path"
 )
 
 func WriteFiles(ctx context.Context, noWrap bool, bs *BlockStore.ReadWrite, paths ...string) (cid.Cid, error) {

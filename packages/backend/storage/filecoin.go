@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"bytes"
 	. "collect3/backend/utils"
 	"context"
 	"encoding/json"
@@ -22,25 +21,44 @@ import (
 type filecoin struct {
 	api_key string
 }
+type filecoinApiResponseValue struct {
+	CID     string `json:"cid"`
+	Size    int32  `json:"size"`
+	Created string `json:"created"`
+	Type    string `json:"type"`
+	Scope   string `json:"scope"`
+}
+
+type fileCoinApiResponseError struct {
+	Name    string `json:"name,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+type filecoinApiResponse struct {
+	Ok    bool                     `json:"ok"`
+	Value filecoinApiResponseValue `json:"value,omitempty"`
+	Error fileCoinApiResponseError `json:"error,omitempty"`
+}
 
 func GetFilecoin(apiKey string) filecoin {
 	return filecoin{api_key: apiKey}
 }
+
+var (
+	ErrorFailedToCreateTempFile error = errors.New("Failed To Create Temp File")
+	ErrorFailedToWriteTempFile  error = errors.New("Failed To Write Temp File")
+)
+
 func (storage filecoin) UploadFile(payload UploadFilePayload) (UploadFileResponse, error) {
 	var response UploadFileResponse
-	var body bytes.Buffer
+	var filecoinResponse filecoinApiResponse
 	var err error
 	var tempCarFile *os.File
 	var tempFile *os.File
 
 	tempCarFile, err = os.CreateTemp("", "article_")
 	if err != nil {
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println(err.Error())
-		return UploadFileResponse{}, errors.New("Failed To Create Temp File")
+		return UploadFileResponse{}, ErrorFailedToCreateTempFile
 	}
 	//TODO: maybe is better to use a tempdir and clean with a cronjob or if the dir hits a certain size
 	defer tempCarFile.Close()
@@ -48,125 +66,56 @@ func (storage filecoin) UploadFile(payload UploadFilePayload) (UploadFileRespons
 
 	tempFile, err = os.CreateTemp("", "og_article_")
 	if err != nil {
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println("CREATEFILE ERROR")
-		fmt.Println(err.Error())
-		return UploadFileResponse{}, errors.New("Failed To Create Temp File")
+		return UploadFileResponse{}, ErrorFailedToCreateTempFile
 	}
 	defer tempFile.Close()
 	defer os.Remove(tempFile.Name())
 
 	_, err = tempFile.WriteString(payload.File)
 	if err != nil {
-		fmt.Println("WRITE TO TEMP ERR")
-		fmt.Println("WRITE TO TEMP ERR")
-		fmt.Println("WRITE TO TEMP ERR")
-		fmt.Println("WRITE TO TEMP ERR")
-		fmt.Println(err.Error())
-		return UploadFileResponse{}, errors.New("WRITE TO TEMP ERR")
-	}
-
-	newFile, err := os.Create("./test.car")
-	if err != nil {
-		fmt.Println("FAILED TO CREATE TEST FILE")
-		fmt.Println("FAILED TO CREATE TEST FILE")
-		fmt.Println("FAILED TO CREATE TEST FILE")
-		fmt.Println("FAILED TO CREATE TEST FILE")
-		fmt.Println("FAILED TO CREATE TEST FILE")
-
-		fmt.Println(err.Error())
-		return UploadFileResponse{}, errors.New("FAILED TO CREATE TEST FILE")
+		return UploadFileResponse{}, ErrorFailedToWriteTempFile
 	}
 
 	// make a cid with the right length that we eventually will patch with the root.
 	hasher, err := multihash.GetHasher(multihash.SHA2_256)
 	if err != nil {
-		fmt.Println("CREATE HAHSHER ERROR")
-		fmt.Println("CREATE HAHSHER ERROR")
-		fmt.Println("CREATE HAHSHER ERROR")
-		fmt.Println("CREATE HAHSHER ERROR")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("CREATE HAHSHER ERROR")
-
 	}
 	digest := hasher.Sum([]byte{})
 	hash, err := multihash.Encode(digest, multihash.SHA2_256)
 	if err != nil {
-		fmt.Println("CREATE HASH ERROR")
-		fmt.Println("CREATE HASH ERROR")
-		fmt.Println("CREATE HASH ERROR")
-		fmt.Println("CREATE HASH ERROR")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("CREATE HASH ERROR")
 	}
 	proxyRoot := cid.NewCidV1(uint64(multicodec.DagPb), hash)
 
-	options := []carThings.Option{}
+	options := []carThings.Option{BlockStore.WriteAsCarV1(true)}
 
 	blockreader, err := BlockStore.OpenReadWriteFile(tempCarFile, []cid.Cid{proxyRoot}, options...)
 
 	if err != nil {
-		fmt.Println("BLOCK READER ERROR")
-		fmt.Println("BLOCK READER ERROR")
-		fmt.Println("BLOCK READER ERROR")
-		fmt.Println("BLOCK READER ERROR")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("BLOCK READER ERROR")
 	}
 
-	root, err := WriteFiles(context.Background(), false, blockreader, tempFile.Name())
+	root, err := WriteFiles(context.Background(), true, blockreader, tempFile.Name())
 
 	if err != nil {
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		return UploadFileResponse{}, errors.New("ERROR WRITING CAR FILE")
-	}
-
-	_, err = io.Copy(newFile, tempCarFile)
-	if err != nil {
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println("ERROR WRITING CAR FILE")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("ERROR WRITING CAR FILE")
 	}
 
 	fmt.Println("CID: " + root.String())
 
-	_, err = body.ReadFrom(tempCarFile)
-
-	if err != nil {
-		return UploadFileResponse{}, ErrorFailedToReadFile
-	}
-
 	if err := blockreader.Finalize(); err != nil {
-		fmt.Println("ERROR CLOSING THE FILE")
-		fmt.Println("ERROR CLOSING THE FILE")
-		fmt.Println("ERROR CLOSING THE FILE")
-		fmt.Println("ERROR CLOSING THE FILE")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("ERROR CLOSING THE FILE")
 	}
 
 	err = carThings.ReplaceRootsInFile(tempCarFile.Name(), []cid.Cid{root})
 
 	if err != nil {
-		fmt.Println("ERROR FAILED TO REWRITE THE CID")
-		fmt.Println("ERROR FAILED TO REWRITE THE CID")
-		fmt.Println("ERROR FAILED TO REWRITE THE CID")
-		fmt.Println("ERROR FAILED TO REWRITE THE CID")
-		fmt.Println("ERROR FAILED TO REWRITE THE CID")
-		fmt.Println(err.Error())
 		return UploadFileResponse{}, errors.New("ERROR FAILED TO REWRITE THE CID")
 	}
 
 	url := "https://api.nft.storage/upload"
-	req, err := http.NewRequest(http.MethodPost, url, &body)
+	req, err := http.NewRequest(http.MethodPost, url, tempCarFile)
 	if err != nil {
 		return UploadFileResponse{}, ErrorFailedToCreateClient
 	}
@@ -182,17 +131,16 @@ func (storage filecoin) UploadFile(payload UploadFilePayload) (UploadFileRespons
 	}
 
 	if res.StatusCode != http.StatusOK {
-		defer res.Body.Close()
-		bodyBytes, err := io.ReadAll(res.Body)
-		var bodyString = ""
+
+		err = json.NewDecoder(res.Body).Decode(&filecoinResponse)
 		if err == nil {
-			bodyString = string(bodyBytes)
+			return UploadFileResponse{}, ErrorFailedToReadResponse
 		}
 		Logger.Error(
 			fmt.Sprintf("Failed To Upload File, Status %d", res.StatusCode),
 			slog.String(
 				"Response.Body",
-				bodyString,
+				filecoinResponse.Error.Message,
 			),
 		)
 		if res.StatusCode == http.StatusBadRequest {
@@ -204,16 +152,18 @@ func (storage filecoin) UploadFile(payload UploadFilePayload) (UploadFileRespons
 		return UploadFileResponse{}, ErrorNonOkay
 	}
 
-	err = json.NewDecoder(res.Body).Decode(&response)
+	err = json.NewDecoder(res.Body).Decode(&filecoinResponse)
 	if err != nil {
 		return UploadFileResponse{}, ErrorFailedToReadResponse
 	}
+	response = UploadFileResponse{
+		CID: filecoinResponse.Value.CID,
+	}
 	return response, nil
-
 }
 
 func (storage filecoin) DownloadFile(payload DownloadFilePayload) (string, error) {
-	url := fmt.Sprintf("http://localhost:5050/s5/download/%s?auth_token=%s", payload.CID, payload.AuthToken)
+	url := fmt.Sprintf("https://nftstorage.link/ipfs/%s", payload.CID)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrorFailedToCreateClient
