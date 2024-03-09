@@ -29,8 +29,6 @@ const (
 	FileCoinOption string = "filecoin"
 )
 
-var options = [2]string{SiaOption, FileCoinOption}
-
 var fileCoinApiKey string
 var s5ApiKey string
 
@@ -57,22 +55,16 @@ func SetS5ApiKey(key string) {
 	s5ApiKey = key
 }
 
-func ValidStorageOption(input string) bool {
-	for _, v := range options {
-		if v == input {
-			return true
-		}
-	}
-	return false
-}
-
-func GetStorage(option string) Storage {
+func GetStorage(option string) (Storage, error) {
 	switch option {
 	case SiaOption:
-		return GetS5(s5ApiKey)
+		return GetS5(s5ApiKey), nil
 	case FileCoinOption:
-		return GetFilecoin(fileCoinApiKey)
+		if fileCoinApiKey == "" {
+			return nil, ErrorInvalidStorageOption
+		}
+		return GetFilecoin(fileCoinApiKey), nil
 	default:
-		return GetS5(s5ApiKey)
+		return nil, ErrorInvalidStorageOption
 	}
 }

@@ -25,7 +25,12 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
-	storage := GetStorage(storageOption)
+	storage, err := GetStorage(storageOption)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, "Invalid Storage Option "+storageOption)
+		return
+	}
 
 	file, err = storage.DownloadFile(payload)
 
