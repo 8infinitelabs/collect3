@@ -2,16 +2,16 @@ import "./articles.css";
 import { getArticles, deleteArticle, listenToStorage, getActiveStorage } from "../../utils/storage";
 import { Metadata } from "../../utils/utils";
 
-function articleToElement(key: string, article : Metadata) : HTMLLIElement {
+function articleToElement(key: string, article: Metadata): HTMLLIElement {
   const element = `
     <div class="article-header">
-      <h2>${article.title}</h2> ${article.byline? `<span>by: ${article.byline}</span>` : ''}
+      <h2>${article.title}</h2> ${article.byline ? `<span>by: ${article.byline}</span>` : ''}
     </div>
     <p>
       ${article.excerpt}
     </p>
     <div>
-    <span>${article.length} ${article.length == 1? 'minute': 'minutes'} to read</span>
+    <span>${article.length} ${article.length == 1 ? 'minute' : 'minutes'} to read</span>
     <span>in ${article.lang}</span>
     </div>
     <a href="${chrome.runtime.getURL('preview.html')}?url=${encodeURIComponent(key)}" target="_blank" class="main">Read Article</a>
@@ -68,7 +68,7 @@ getActiveStorage().then((storage) => {
     }
     listenToStorage((changes) => {
       for (let [key, { oldValue: oldRawValue, newValue: newRawValue }] of Object.entries(changes)) {
-        if (key === storage.url) {
+        if (key == (storage.url + storage.storageType)) {
           const oldValue = new Map(JSON.parse(oldRawValue)) as Map<string, Metadata>;
           const newValue = new Map(JSON.parse(newRawValue)) as Map<string, Metadata>;
           if (oldValue.size == 0) {
@@ -78,7 +78,7 @@ getActiveStorage().then((storage) => {
           if (newValue.size == 0) {
             container!.innerHTML = "";
             noElementMessage(container as Element);
-          } else if(oldValue.size < newValue.size){
+          } else if (oldValue.size < newValue.size) {
             newValue.forEach((value, key) => {
               if (!oldValue.has(key)) {
                 container?.appendChild(articleToElement(key, value));

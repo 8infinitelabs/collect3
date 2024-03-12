@@ -23,14 +23,14 @@ export const accountExist = async (uid: string, activeStorage: Storage): Promise
       uid,
     }),
   });
-  const response: {exist: boolean} = await raw.json();
+  const response: { exist: boolean } = await raw.json();
   return response.exist;
 };
 
 export const createAccount = async (activeStorage?: Storage, userUID?: string) => {
   let uid: string;
-  if (userUID ) {
-    uid = userUID ;
+  if (userUID) {
+    uid = userUID;
   } else {
     uid = await getUserUid();
   }
@@ -46,7 +46,7 @@ export const createAccount = async (activeStorage?: Storage, userUID?: string) =
       uid,
     }),
   });
-  const response: {id: string, auth_token: string} = await raw.json();
+  const response: { id: string, auth_token: string } = await raw.json();
   await setAuthToken(storage, response.auth_token);
   return response;
 }
@@ -54,7 +54,7 @@ export const createAccount = async (activeStorage?: Storage, userUID?: string) =
 export const createToken = async (activeStorage?: Storage, userUID?: string) => {
   let uid: string;
   if (userUID) {
-    uid = userUID ;
+    uid = userUID;
   } else {
     uid = await getUserUid();
   }
@@ -70,7 +70,7 @@ export const createToken = async (activeStorage?: Storage, userUID?: string) => 
       uid,
     }),
   });
-  const response: {auth_token: string} = await raw.json();
+  const response: { auth_token: string } = await raw.json();
   await setAuthToken(storage, response.auth_token);
   return response;
 }
@@ -89,7 +89,7 @@ export const getOrCreateToken = async (activeStorage: Storage): Promise<string> 
   return auth_token;
 };
 
-export const uploadFile = async (id: string,file: string, metadata: Metadata, activeStorage?: Storage) => {
+export const uploadFile = async (id: string, file: string, metadata: Metadata, activeStorage?: Storage) => {
   const uid = await getUserUid();
   let storage: Storage;
   if (activeStorage) {
@@ -110,7 +110,7 @@ export const uploadFile = async (id: string,file: string, metadata: Metadata, ac
     url: id,
     content: file,
   }
-  const raw = await fetch(`${storage.url}upload`, {
+  const raw = await fetch(`${storage.url}${storage.storageType}/upload`, {
     method: "POST",
     body: JSON.stringify({
       file: JSON.stringify(content),
@@ -124,7 +124,7 @@ export const uploadFile = async (id: string,file: string, metadata: Metadata, ac
   if (raw.status !== 200) {
     throw new Error("Something Went Wrong");
   }
-  const response: {cid: string} = await raw.json()
+  const response: { cid: string } = await raw.json()
   setArticleCID(response.cid, id);
   return response;
 };
@@ -142,7 +142,7 @@ export const downloadFile = async (cid: string, activeStorage?: Storage) => {
   } else {
     auth_token = storage.auth_token;
   }
-  const raw = await fetch(`${storage.url}download`, {
+  const raw = await fetch(`${storage.url}${storage.storageType}/download`, {
     method: "POST",
     body: JSON.stringify({
       cid,
