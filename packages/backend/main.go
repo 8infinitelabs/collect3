@@ -37,6 +37,7 @@ func main() {
 	router := gin.Default()
 	//TODO: Handle properly the 401 errors
 	router.GET("/ping", ping)
+	router.GET("/:storage/available", IsStorageAvailable)
 	router.POST("/account_exist", AccountExist)
 	router.POST("/create_account", CreateAccount)
 	router.POST("/create_token", CreateToken)
