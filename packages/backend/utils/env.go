@@ -1,25 +1,30 @@
 package utils
 
 import (
-  "os"
 	"fmt"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/mdobak/go-xerrors"
 )
 
-func GetEnvVar(key string) string {
-	err := godotenv.Load(".env")
-  Logger.Info(
-    fmt.Sprintf("getting %s", key),
-  )
+var isEnvLoaded = false
 
-	if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    );
-    os.Exit(1)
+func GetEnvVar(key string) string {
+	var err error
+	if !isEnvLoaded {
+		err = godotenv.Load(".env")
+		if err != nil {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			os.Exit(1)
+		}
+		isEnvLoaded = true
 	}
+	Logger.Info(
+		fmt.Sprintf("getting %s", key),
+	)
 
 	return os.Getenv(key)
 }

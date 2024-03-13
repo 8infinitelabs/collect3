@@ -4,7 +4,7 @@ import { ACTIVE_STORAGE, Storage, STORAGE_OPTIONS } from "../../utils/utils";
 
 let activeStorage;
 let reducedmotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-function storageToElement(option : Storage, isActive: boolean) : HTMLLIElement {
+function storageToElement(option: Storage, isActive: boolean): HTMLLIElement {
   const element = `
     <div class="article-header">
       <h2>${option.alias}</h2>
@@ -13,7 +13,7 @@ function storageToElement(option : Storage, isActive: boolean) : HTMLLIElement {
       ${option.url}
     </p>
     <div>
-      ${isActive? "<span class=\"isActive\">isActive</span>": ""}
+      ${isActive ? "<span class=\"isActive\">isActive</span>" : ""}
     </div>
     <button
       title="click to make active"
@@ -51,10 +51,11 @@ function noElementMessage(container: Element) {
 
 const form: HTMLFormElement | null = document.querySelector("#create-storage-option")
 if (form) {
-  form.addEventListener('submit', async function (e:Event) {
+  form.addEventListener('submit', async function(e: Event) {
     e.preventDefault()
     const aliasInput: HTMLInputElement | null = form[0] as HTMLInputElement;
     const urlInput: HTMLInputElement | null = form[1] as HTMLInputElement;
+    const fileStorageType: HTMLSelectElement | null = form[2] as HTMLSelectElement;
     if (!aliasInput.value.trim()) {
       console.log("alias empty");
       return
@@ -67,7 +68,7 @@ if (form) {
       return err;
     }
 
-    const result = await createStorageOption(url.toString(), aliasInput.value.trim());
+    const result = await createStorageOption(url.toString(), aliasInput.value.trim(), fileStorageType.value);
     console.log('result: ', result);
   })
 }
@@ -94,7 +95,7 @@ if (reducedmotion) {
   };
 }
 
-const makeMainCallback = (container: Element | null, url: string) => {
+const makeMainCallback = (container: Element | null, url: string, storageType: string) => {
   return async () => {
     const activeNode = container?.querySelector('.isActive');
     activeNode?.remove();
@@ -104,7 +105,7 @@ const makeMainCallback = (container: Element | null, url: string) => {
     newChild.textContent = "isActive";
     newChild.className = "isActive";
     child?.appendChild(newChild);
-    await changeActiveStorage(url, true);
+    await changeActiveStorage(url, storageType, true);
   }
 };
 
@@ -119,7 +120,7 @@ Promise.all([
     }
     const element = storageToElement(
       option,
-      option.url === activeStorage.url,
+      option.url === activeStorage.url && option.storageType == activeStorage.storageType,
     );
     container?.appendChild(element);
     return element;
@@ -142,7 +143,7 @@ Promise.all([
       const option = options[i];
 
       deleteButton?.addEventListener('click', deleteButtonCallback);
-      makeMainButton?.addEventListener('click', makeMainCallback(container, option.url));
+      makeMainButton?.addEventListener('click', makeMainCallback(container, option.url, option.storageType));
     });
   } else {
     if (container) noElementMessage(container);
@@ -178,7 +179,7 @@ Promise.all([
         if (shouldAddNode) {
           newValue.forEach((value) => {
             const exist = oldValue.find((option) => {
-              const isTheSame = option.url == value.url;
+              const isTheSame = option.url == value.url && option.storageType == value.storageType;
               if (!isTheSame) {
                 return false;
               }
@@ -196,7 +197,7 @@ Promise.all([
               const deleteButton = el.querySelector('.delete-button');
 
               deleteButton?.addEventListener('click', deleteButtonCallback);
-              makeMainButton?.addEventListener('click', makeMainCallback(container, value.url));
+              makeMainButton?.addEventListener('click', makeMainCallback(container, value.url, value.storageType));
               container?.appendChild(el);
             }
           });
@@ -204,8 +205,8 @@ Promise.all([
         }
         oldValue.forEach((value) => {
           const exist = newValue.find((option) => {
-              return option.url == value.url;
-            });
+            return option.url == value.url;
+          });
           if (!exist) {
             const oldElement = document.querySelector(`[id='${value.url}-root']`);
             oldElement?.remove();

@@ -1,81 +1,79 @@
 package routes
 
 import (
-  "fmt"
+	. "collect3/backend/storage"
+	. "collect3/backend/utils"
+	"errors"
 	"net/http"
-  "io"
-  "log/slog"
-  . "collect3/backend/utils"
 
-  "github.com/mdobak/go-xerrors"
 	"github.com/gin-gonic/gin"
+	"github.com/mdobak/go-xerrors"
 )
 
-type DownloadFilePayload struct {
-  CID string `json:"cid"`;
-  AuthToken string `json:"auth_token"`;
-}
-
 func DownloadFile(c *gin.Context) {
-  var payload DownloadFilePayload;
-  var err error;
+	var payload DownloadFilePayload
+	var err error
+	var file string
+	storageOption := c.Param("storage")
 
-  err = c.BindJSON(&payload);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusBadRequest, "Invalid Request Body");
-    return;
-  }
-
-  url := fmt.Sprintf("http://localhost:5050/s5/download/%s?auth_token=%s", payload.CID, payload.AuthToken);
-  req, err := http.NewRequest(http.MethodGet, url, nil);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusInternalServerError, "Failed To Download File");
-		return;
+	err = c.BindJSON(&payload)
+	if err != nil {
+		Logger.Error(
+			xerrors.WithStackTrace(err, 0).Error(),
+		)
+		c.String(http.StatusBadRequest, "Invalid Request Body")
+		return
 	}
 
-  res, err := http.DefaultClient.Do(req);
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(http.StatusInternalServerError, "Failed To Download File");
-		return;
+	storage, err := GetStorage(storageOption)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, "Invalid Storage Option "+storageOption)
+		return
 	}
-  if res.StatusCode != http.StatusOK {
-    defer res.Body.Close()
-    bodyBytes, err := io.ReadAll(res.Body)
-    var bodyString = ""
-    if err == nil {
-        bodyString = string(bodyBytes)
-    }
-    Logger.Error(
-      fmt.Sprintf("Failed To Download File, Status %d", res.StatusCode),
-      slog.String(
-        "Response.Body",
-        bodyString,
-      ),
-    )
-    c.String(res.StatusCode, "Failed To Download File");
-    return;
-  }
 
-  defer res.Body.Close();
+	file, err = storage.DownloadFile(payload)
 
-  file, err := io.ReadAll(res.Body);
+	if err != nil {
+		if errors.Is(err, ErrorFailedToCreateClient) {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			c.String(http.StatusInternalServerError, "Failed To Download File")
+			return
+		}
 
-  if err != nil {
-    Logger.Error(
-      xerrors.WithStackTrace(err, 0).Error(),
-    )
-    c.String(res.StatusCode, "Something Went Wrong");
-    return
-  }
+		if errors.Is(err, ErrorFailedToDownloadFile) {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			c.String(http.StatusInternalServerError, "Failed To Download File")
+			return
+		}
 
-  c.String(http.StatusAccepted, string(file));
+		if errors.Is(err, ErrorUnauthorized) {
+			c.String(http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		if errors.Is(err, ErrorNotFound) {
+			c.String(http.StatusNotFound, "File Not Found")
+			return
+		}
+		if errors.Is(err, ErrorNonOkay) {
+			c.String(http.StatusInternalServerError, "Failed To Download File")
+			return
+		}
+
+		if errors.Is(err, ErrorFailedToReadFile) {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			c.String(http.StatusInternalServerError, "Failed To Read File")
+			return
+		}
+		c.String(http.StatusInternalServerError, "Failed To Download File")
+		return
+	}
+
+	c.String(http.StatusAccepted, file)
 }
