@@ -20,14 +20,20 @@ chrome.runtime.onMessage.addListener((
 ) => {
   if (request.type === 'toBase64') {
     fromLocalOnlyToMultipleRemotes()
-    .then(() => fromHtmlToBase64())
-    .then(() => sendResponse({message:'Done'}))
-    .catch(() => sendResponse({message:'Error'}));
+      .then(() => fromHtmlToBase64())
+      .then(() => sendResponse({ message: 'Done' }))
+      .catch(() => sendResponse({ message: 'Error' }));
   }
   if (request.type === 'sync') {
     const { url } = request.payload;
     const upload = async () => {
       try {
+        chrome.notifications.create("", {
+          iconUrl: 'icons/icon_128.png',
+          type: 'basic',
+          message: 'Saving Article In Server',
+          title: 'Info',
+        })
         const storage = await getActiveStorage();
         const articles = await getArticles();
         const file = await getArticleContent(url);
@@ -37,7 +43,7 @@ chrome.runtime.onMessage.addListener((
         try {
           const result = await uploadFile(url, file, metadata as Metadata, storage)
           cid = result.cid;
-        } catch(err: any) {
+        } catch (err: any) {
           if (err.message === "Invalid Token") {
             await getOrCreateToken(storage);
             const result = await uploadFile(url, file, metadata as Metadata, storage)
@@ -48,14 +54,20 @@ chrome.runtime.onMessage.addListener((
         }
 
         sendResponse({
-          message:'Done',
+          message: 'Done',
           payload: {
             cid: cid,
           },
         })
-      } catch (err) {
+      } catch (err: any) {
+        chrome.notifications.create("", {
+          iconUrl: 'icons/icon_128.png',
+          type: 'basic',
+          message: 'Failed To Save In Server',
+          title: 'Info',
+        })
         console.log(err);
-        sendResponse({message:'Error'})
+        sendResponse({ message: 'Error' })
       }
     };
     upload();
@@ -68,7 +80,7 @@ chrome.runtime.onMessage.addListener((
           return;
         }
         const rawArticles = await getFromStorage(storage.url);
-        const articles: [[string,Metadata]] = JSON.parse(rawArticles);
+        const articles: [[string, Metadata]] = JSON.parse(rawArticles);
         const filteredArticles = articles.filter(([_, metadata]) => {
           return !metadata.cid;
         });
@@ -77,10 +89,10 @@ chrome.runtime.onMessage.addListener((
           const file = await getArticleContent(url);
           await uploadFile(url, file, metadata as Metadata, storage);
         }
-        sendResponse({message:'Done'})
+        sendResponse({ message: 'Done' })
       } catch (err) {
         console.log(err);
-        sendResponse({message:'Error'})
+        sendResponse({ message: 'Error' })
       }
     };
     upload();
@@ -92,17 +104,17 @@ chrome.runtime.onMessage.addListener((
         if (storage.shouldSync && !storage.auth_token) {
           const token = await getOrCreateToken(storage);
           sendResponse({
-            message:'Done',
+            message: 'Done',
             payload: {
               token,
             },
           })
           return;
         }
-        sendResponse({message:'Done'})
+        sendResponse({ message: 'Done' })
       } catch (err) {
         console.log(err);
-        sendResponse({message:'Error'})
+        sendResponse({ message: 'Error' })
       }
     };
     create()
