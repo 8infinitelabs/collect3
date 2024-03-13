@@ -16,6 +16,16 @@ export const getUserUid = async (): Promise<string> => {
   return id;
 };
 
+export const ping = async (activeStorage: Storage): Promise<string> => {
+  const raw = await fetch(`${activeStorage?.url}ping`);
+  return await raw.text();
+};
+
+export const isStorageAvailable = async (activeStorage: Storage): Promise<string> => {
+  const raw = await fetch(`${activeStorage?.url}${activeStorage?.storageType}/available`);
+  return await raw.text();
+};
+
 export const accountExist = async (uid: string, activeStorage: Storage): Promise<boolean> => {
   const raw = await fetch(`${activeStorage?.url}account_exist`, {
     method: 'POST',

@@ -115,7 +115,10 @@ func CreateToken(c *gin.Context) {
 		return
 	}
 
-	token, _ := FetchNewToken(user.ID, c)
+	token, err := FetchNewToken(user.ID, c)
+	if err != nil {
+		return
+	}
 
 	err = DB.UpdateToken(user.ID, token)
 	if err != nil {

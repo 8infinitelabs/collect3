@@ -1,6 +1,7 @@
 import "./storage.css";
 import { changeActiveStorage, createStorageOption, deleteStorageOption, getActiveStorage, getStorageOptions, listenToStorage } from "../../utils/storage";
 import { ACTIVE_STORAGE, Storage, STORAGE_OPTIONS } from "../../utils/utils";
+import { isStorageAvailable, ping } from "../../utils/backend";
 
 let activeStorage;
 let reducedmotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -64,10 +65,58 @@ if (form) {
     try {
       url = new URL(urlInput.value)
     } catch (err) {
+      chrome.notifications.create("", {
+        iconUrl: 'icons/icon_128.png',
+        type: 'basic',
+        message: 'Invalid Url',
+        title: 'Error',
+      });
       console.log(err)
       return err;
     }
-
+    chrome.notifications.create("", {
+      iconUrl: 'icons/icon_128.png',
+      type: 'basic',
+      message: 'Verifying Server Availability',
+      title: 'Info',
+    });
+    const store: Storage = {
+      url: url.toString(),
+      alias: aliasInput.value.trim(),
+      deleted: false,
+      storageType: fileStorageType.value,
+    }
+    try {
+      await ping(store);
+    } catch (err) {
+      chrome.notifications.create("", {
+        iconUrl: 'icons/icon_128.png',
+        type: 'basic',
+        message: 'Server Is Not Available',
+        title: 'Error',
+      });
+      return
+    }
+    try {
+      const storageTypeAvailable = await isStorageAvailable(store);
+      if (storageTypeAvailable !== 'is available') {
+        chrome.notifications.create("", {
+          iconUrl: 'icons/icon_128.png',
+          type: 'basic',
+          message: 'Storage Option Not Available',
+          title: 'Error',
+        });
+        return
+      }
+    } catch (err) {
+      chrome.notifications.create("", {
+        iconUrl: 'icons/icon_128.png',
+        type: 'basic',
+        message: 'Storage Option Not Available',
+        title: 'Error',
+      });
+      return
+    }
     const result = await createStorageOption(url.toString(), aliasInput.value.trim(), fileStorageType.value);
     console.log('result: ', result);
   })
