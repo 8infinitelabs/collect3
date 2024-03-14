@@ -62,7 +62,7 @@ Maybe you can mention me or this repo in the acknowledgements too
   * [Environment Variables](#key-environment-variables)
 - [Getting Started](#toolbox-getting-started)
   * [Prerequisites](#bangbang-prerequisites)
-  * [Installation](#gear-installation)
+  * [Installation](#gear-installing-extension)
   * [Running Tests](#test_tube-running-tests)
   * [Run Locally](#running-run-locally)
   * [Deployment](#triangular_flag_on_post-deployment)
@@ -158,18 +158,55 @@ To run this project, you will need to add the following environment variables to
 -->
 
 <!-- Getting Started -->
-## 	:toolbox: Getting Started
+## :toolbox: Getting Started
 
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
 
-* Go 1.21
+for the extension
 * Yarn
 * Node
+
+for the backend
+* Go 1.21
 * Docker-Compose
 * Sqlite3
 * [renterd](https://docs.sia.tech/renting/setting-up-renterd) (this is only used to generate the config)
 * gcc
+
+### :gear: Installing Extension
+
+first we need to move to the extension directory
+```bash
+  cd packages/extension
+```
+
+we can start by installing the dependencies
+```bash
+  yarn install
+```
+
+Copy the contents of the .env.example and create your .env
+
+Then you can build the extension
+```sh
+  yarn build
+```
+or you can execute this command if you are going to make changes to the code.
+```sh
+  yarn start
+```
+
+[And finally you can install it this way](https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system/)
+
+### :gear: Using Remote Server
+If you want to use an already available server instead of hosting your own
+you can.
+
+First you need to open the extension and click in the "My Storage" button,
+this will take you to a new page where you can manage your storage options,
+to add a new one you just need the server url, an alias of your choice,
+and then you can click the "create storage option" button.
 
 <!-- Run Locally -->
 ### :running: Run Locally
@@ -239,30 +276,6 @@ after that you can install the backend dependencies
   go mod tidy
 ```
 
-now moving to the extension
-```bash
-  cd ../extension
-```
-
-we can start by installing the dependencies
-```bash
-  yarn install
-```
-
-Copy the contents of the .env.example and create your .env
-
-Then you can build the extension
-```sh
-    yarn build
-```
-[And finally you can install it this way](https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system/)
-
-or you can execute
-```sh
-    yarn start
-```
-if you are going to make changes to the code.
-
 and for the backend you can user [air](https://github.com/cosmtrek/air) for development or just run
 ```bash
   go run main.go
@@ -289,7 +302,7 @@ for production you can compile it and run the executable that you will find in t
 * [x] Save them in Local Browser (temporally storage)
 * [ ] Create an NFT
 * [ ] Improve Read-mode view
-* [ ] Store the content into decentralized storage
+* [x] Store the content into decentralized storage
 * [ ] Share your articles!
 * [ ] Add comments into the article
 * [ ] Read comments from any other article owners
