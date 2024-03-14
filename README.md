@@ -205,7 +205,7 @@ you can.
 
 First you need to open the extension and click in the "My Storage" button,
 this will take you to a new page where you can manage your storage options,
-to add a new one you just need the server url, an alias of your choice,
+to add a new one you just need the server url, an alias of your choice, select the storage option
 and then you can click the "create storage option" button.
 
 <!-- Run Locally -->
