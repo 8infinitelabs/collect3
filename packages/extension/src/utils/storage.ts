@@ -9,9 +9,9 @@ import {
   STORAGE_OPTIONS,
 } from "./utils";
 
-export async function getFromStorage(key: string) : Promise<any> {
+export async function getFromStorage(key: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], function (result) {
+    chrome.storage.local.get([key], function(result) {
       resolve(result[key]);
     });
   });
@@ -19,25 +19,26 @@ export async function getFromStorage(key: string) : Promise<any> {
 
 export async function setToStorage(key: string, value: any): Promise<void> {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({[key]: value}, function () {
+    chrome.storage.local.set({ [key]: value }, function() {
       resolve(undefined);
     });
   });
 }
 
-export async function removeFromStorage(key: string) : Promise<void> {
+export async function removeFromStorage(key: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.remove(key, function () {
+    chrome.storage.local.remove(key, function() {
       resolve(undefined);
     });
   });
 }
 async function initializeStorage() {
-  const defaultStorage : Storage = {
+  const defaultStorage: Storage = {
     url: DEFAULT_API as string,
     alias: DEFAULT,
     deleted: false,
     shouldSync: false,
+    storageType: 'sia',
   };
   await setToStorage(
     ACTIVE_STORAGE,
@@ -54,7 +55,7 @@ async function initializeStorage() {
   );
 }
 
-export async function getActiveStorage() : Promise<Storage> {
+export async function getActiveStorage(): Promise<Storage> {
   let current = await getFromStorage(ACTIVE_STORAGE);
   if (!current) {
     await initializeStorage();
@@ -63,13 +64,14 @@ export async function getActiveStorage() : Promise<Storage> {
       alias: DEFAULT,
       deleted: false,
       shouldSync: false,
+      storageType: 'sia',
     };
   }
   let activeStorage: Storage = JSON.parse(current);
   return activeStorage;
 }
 
-export async function getStorageOptions() : Promise<Storage[]> {
+export async function getStorageOptions(): Promise<Storage[]> {
   let rawOptions = await getFromStorage(STORAGE_OPTIONS);
   if (!rawOptions) {
     await initializeStorage();
@@ -79,17 +81,18 @@ export async function getStorageOptions() : Promise<Storage[]> {
   return options;
 }
 
-export async function createStorageOption(url: string, alias: string) : Promise<boolean> {
+export async function createStorageOption(url: string, alias: string, storageType: string): Promise<boolean> {
   const options = await getStorageOptions();
   const exist = options.findIndex((s) => {
     const optionUrl = new URL(s.url);
     const newUrl = new URL(url);
-      return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname;
+    return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname && s.storageType == storageType;
   });
-  const newStorage : Storage = {
+  const newStorage: Storage = {
     url,
     alias,
     deleted: false,
+    storageType,
   };
   if (exist === -1) {
     options.push(newStorage);
@@ -117,7 +120,7 @@ export async function deleteStorageOption(url: string) {
   });
 
   if (url === active.url) {
-    await changeActiveStorage(DEFAULT_API as string, false);
+    await changeActiveStorage(DEFAULT_API as string, 'sia', false);
   }
 
   if (toDelete === -1) {
@@ -129,12 +132,12 @@ export async function deleteStorageOption(url: string) {
   await setToStorage(STORAGE_OPTIONS, JSON.stringify(options));
 };
 
-export async function changeActiveStorage(url: string, sync: boolean) : Promise<void> {
+export async function changeActiveStorage(url: string, storageType: string, sync: boolean): Promise<void> {
   const options = await getStorageOptions();
   const exist = options.find((s) => {
     const optionUrl = new URL(s.url);
     const newUrl = new URL(url);
-      return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname;
+    return optionUrl.host == newUrl.host && optionUrl.pathname == newUrl.pathname && s.storageType == storageType;
   });
 
   if (!exist) {
@@ -150,21 +153,21 @@ export async function changeActiveStorage(url: string, sync: boolean) : Promise<
   );
 }
 
-export async function setAuthToken(storage: Storage, auth_token: string) : Promise<void> {
+export async function setAuthToken(storage: Storage, auth_token: string): Promise<void> {
   const options = await getStorageOptions();
   const active = await getActiveStorage();
   const storageUrl = new URL(storage.url);
   const activeUrl = new URL(active.url);
   const index = options.findIndex((s) => {
     const optionUrl = new URL(s.url);
-      return optionUrl.host == storageUrl.host && optionUrl.pathname == storageUrl.pathname;
+    return optionUrl.host == storageUrl.host && optionUrl.pathname == storageUrl.pathname && s.storageType == storage.storageType;
   });
 
   if (index === -1) {
     return;
   }
 
-  if (activeUrl.host == storageUrl.host && activeUrl.pathname == storageUrl.pathname) {
+  if (activeUrl.host == storageUrl.host && activeUrl.pathname == storageUrl.pathname && active.storageType == storage.storageType) {
     await setToStorage(
       ACTIVE_STORAGE,
       JSON.stringify(
@@ -187,7 +190,7 @@ export async function setAuthToken(storage: Storage, auth_token: string) : Promi
 
 export async function getArticles(): Promise<Map<string, Metadata>> {
   const key = await getActiveStorage();
-  let articles = await getFromStorage(key.url);
+  let articles = await getFromStorage(key.url + key.storageType);
   if (!articles) {
     return new Map();
   } else {
@@ -198,44 +201,46 @@ export async function getArticles(): Promise<Map<string, Metadata>> {
 
 export async function setArticles(url: string, data: Metadata, articles: Map<string, Metadata>) {
   const key = await getActiveStorage();
-  if (!articles.has(url)) {
-    articles.set(url, data);
-    await setToStorage(
-      key.url,
-      JSON.stringify(
-        Array.from(
-          articles.entries(),
-        ),
-      ),
-    );
+  if (articles.has(url)) {
+    return
   }
+  articles.set(url, data);
+  await setToStorage(
+    key.url + key.storageType,
+    JSON.stringify(
+      Array.from(
+        articles.entries(),
+      ),
+    ),
+  );
 }
 
 export async function setArticleCID(cid: string, url: string) {
   const key = await getActiveStorage();
   const articles = await getArticles();
   const data = articles.get(url);
-  if (data) {
-    data!.cid = cid;
-    articles.set(url, data);
-    await setToStorage(
-      key.url,
-      JSON.stringify(
-        Array.from(
-          articles.entries(),
-        ),
-      ),
-    );
+  if (!data) {
+    return
   }
+  data!.cid = cid;
+  articles.set(url, data);
+  await setToStorage(
+    key.url + key.storageType,
+    JSON.stringify(
+      Array.from(
+        articles.entries(),
+      ),
+    ),
+  );
 }
 
-export async function removeArticles(url: string) : Promise<boolean> {
+export async function removeArticles(url: string): Promise<boolean> {
   const articles = await getArticles();
   const result = articles.delete(url);
   const key = await getActiveStorage();
   if (result) {
     await setToStorage(
-      key.url,
+      key.url + key.storageType,
       JSON.stringify(
         Array.from(
           articles.entries(),
@@ -246,28 +251,28 @@ export async function removeArticles(url: string) : Promise<boolean> {
   return result;
 }
 
-export async function getArticleContent(url: string) : Promise<string> {
+export async function getArticleContent(url: string): Promise<string> {
   return getFromStorage(url);
 }
 
 export async function setArticleContent(url: string, content: string): Promise<void> {
   const exist = await getArticleContent(url);
-  if(!exist) {
+  if (!exist) {
     await setToStorage(url, content);
   }
 }
 
-export async function deleteArticleContent(url: string) : Promise<void> {
+export async function deleteArticleContent(url: string): Promise<void> {
   await removeFromStorage(url);
 }
 
-export async function saveArticle(url: string, article: Article) : Promise<void> {
+export async function saveArticle(url: string, article: Article): Promise<void> {
   const articles = await getArticles();
   const { content, textContent, ...metadata } = article;
   const numOfWords = textContent.split(' ').length;
   // 255 is the word per minute constant
   const wpm = 255;
-  metadata.length = Math.ceil( numOfWords / wpm );
+  metadata.length = Math.ceil(numOfWords / wpm);
   if (articles.has(url)) {
     return;
   }
@@ -289,13 +294,13 @@ export async function saveArticle(url: string, article: Article) : Promise<void>
   }
 }
 
-export async function deleteArticle(url: string) : Promise<void> {
+export async function deleteArticle(url: string): Promise<void> {
   await removeArticles(url);
   await deleteArticleContent(url);
 }
 
 export function listenToStorage(
-  cb: (changes: {[key: string]: chrome.storage.StorageChange; }) => void,
-  ) {
-    chrome.storage.local.onChanged.addListener(cb)
+  cb: (changes: { [key: string]: chrome.storage.StorageChange; }) => void,
+) {
+  chrome.storage.local.onChanged.addListener(cb)
 }

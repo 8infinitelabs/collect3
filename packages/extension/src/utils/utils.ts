@@ -29,6 +29,7 @@ export interface Storage {
   deleted: boolean;
   shouldSync?: boolean;
   auth_token?: string;
+  storageType: string;
 }
 
 export const ACTIVE_STORAGE = 'active_storage';
