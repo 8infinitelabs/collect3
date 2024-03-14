@@ -3,6 +3,7 @@ package routes
 import (
 	. "collect3/backend/utils"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -122,6 +123,10 @@ func CreateToken(c *gin.Context) {
 
 	err = DB.UpdateToken(user.ID, token)
 	if err != nil {
+		if errors.Is(err, ErrDuplicate) {
+			c.JSON(http.StatusOK, gin.H{"id": user.ID, "auth_token": token})
+			return
+		}
 		Logger.Error(
 			xerrors.WithStackTrace(err, 0).Error(),
 		)

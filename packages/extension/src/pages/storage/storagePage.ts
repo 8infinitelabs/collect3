@@ -1,5 +1,12 @@
 import "./storage.css";
-import { changeActiveStorage, createStorageOption, deleteStorageOption, getActiveStorage, getStorageOptions, listenToStorage } from "../../utils/storage";
+import {
+  changeActiveStorage,
+  createStorageOption,
+  deleteStorageOption,
+  getActiveStorage,
+  getStorageOptions,
+  listenToStorage,
+} from "../../utils/storage";
 import { ACTIVE_STORAGE, Storage, STORAGE_OPTIONS } from "../../utils/utils";
 import { isStorageAvailable, ping } from "../../utils/backend";
 

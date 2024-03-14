@@ -130,6 +130,12 @@ func (db *SQLiteRepository) CreateUser(
 func (db *SQLiteRepository) UpdateToken(id int64, token string) error {
 	_, err := db.db.Exec("UPDATE user SET auth_token=? WHERE id=?", token, id)
 	if err != nil {
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) {
+			if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
+				return ErrDuplicate
+			}
+		}
 		return err
 	}
 
