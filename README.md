@@ -51,130 +51,7 @@ Maybe you can mention me or this repo in the acknowledgements too
 
 <br />
 
-<!-- Table of Contents -->
-# :notebook_with_decorative_cover: Table of Contents
-
-- [About the Project](#star2-about-the-project)
-  * [Screenshots](#camera-screenshots)
-  * [Tech Stack](#space_invader-tech-stack)
-  * [Features](#dart-features)
-  * [Color Reference](#art-color-reference)
-  * [Environment Variables](#key-environment-variables)
-- [Getting Started](#toolbox-getting-started)
-  * [Prerequisites](#bangbang-prerequisites)
-  * [Installation](#gear-installing-extension)
-  * [Running Tests](#test_tube-running-tests)
-  * [Run Locally](#running-run-locally)
-  * [Deployment](#triangular_flag_on_post-deployment)
-- [Usage](#eyes-usage)
-- [Roadmap](#compass-roadmap)
-- [Contributing](#wave-contributing)
-  * [Code of Conduct](#scroll-code-of-conduct)
-- [FAQ](#grey_question-faq)
-- [License](#warning-license)
-- [Contact](#handshake-contact)
-- [Acknowledgements](#gem-acknowledgements)
-
-  
-
-<!-- About the Project -->
-## :star2: About the Project
-
-Collect3 is a browser plugin that empowers users to eternalize digital content like articles or posts using web3 and decentralized storage. Unlike traditional bookmarks or saved PDFs, Collect3 allows users to mint and store reader-friendly versions of the content on the dex storage, ensuring permanence and true ownership and doc sharing. This solves the problem of content loss due to website changes, discontinuations, or censorship, offering a robust, decentralized solution for preserving valuable information.
-
-<!-- Screenshots -->
-### :camera: Demo
-
-<div align="center"> 
-  <img src="assets/collect3-demo.gif" alt="demo" />
-</div>
-
-
-<!-- TechStack -->
-### :space_invader: Tech Stack
-
-<details>
-  <summary>Client</summary>
-  <ul>
-    <li><a href="https://www.typescriptlang.org/">Typescript</a></li>
-    <li><a href="https://nextjs.org/">Next.js</a></li>
-    <li><a href="https://reactjs.org/">React.js</a></li>
-    <li><a href="https://tailwindcss.com/">TailwindCSS</a></li>
-  </ul>
-</details>
-
-<details>
-  <summary>Server</summary>
-  <ul>
-    <li><a href="https://www.typescriptlang.org/">Typescript</a></li>
-    <li><a href="https://expressjs.com/">Express.js</a></li>
-  </ul>
-</details>
-
-<details>
-<summary>Database</summary>
-  <ul>
-    <li><a href="https://www.mongodb.com/">MongoDB</a></li>
-  </ul>
-</details>
-
-<details>
-<summary>DevOps</summary>
-  <ul>
-    <li><a href="https://www.docker.com/">Docker</a></li>
-  </ul>
-</details>
-
-<!-- Features -->
-### :dart: Coming Features
-
-- Save articles as NFTs
-- Keep the Articles forever storing them into Decentralized Storage
-- Share your articles with other users!
-- Add comments into the articles
-- Read other owners comments of the same article
-- Resell the articles!
-
-<!-- Color Reference 
-### :art: Color Reference
-
-| Color             | Hex                                                                |
-| ----------------- | ------------------------------------------------------------------ |
-| Primary Color | ![#222831](https://via.placeholder.com/10/222831?text=+) #222831 |
-| Secondary Color | ![#393E46](https://via.placeholder.com/10/393E46?text=+) #393E46 |
-| Accent Color | ![#00ADB5](https://via.placeholder.com/10/00ADB5?text=+) #00ADB5 |
-| Text Color | ![#EEEEEE](https://via.placeholder.com/10/EEEEEE?text=+) #EEEEEE |
--->
-
-<!-- Env Variables 
-### :key: Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`API_KEY`
-
-`ANOTHER_API_KEY`
-
--->
-
-<!-- Getting Started -->
-## :toolbox: Getting Started
-
-<!-- Prerequisites -->
-### :bangbang: Prerequisites
-
-for the extension
-* Yarn
-* Node
-
-for the backend
-* Go 1.21
-* Docker-Compose
-* Sqlite3
-* [renterd](https://docs.sia.tech/renting/setting-up-renterd) (this is only used to generate the config)
-* gcc
-
-### :gear: Installing Extension
+## :gear: Installing Extension
 
 first we need to move to the extension directory
 ```bash
@@ -199,7 +76,7 @@ or you can execute this command if you are going to make changes to the code.
 
 [And finally you can install it this way](https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system/)
 
-### :gear: Using Remote Server
+## :gear: Using Remote Server
 If you want to use an already available server instead of hosting your own
 you can.
 
@@ -294,23 +171,6 @@ for production you can compile it and run the executable that you will find in t
    CGO_ENABLED=1
  ```
  and make sure you have installed gcc
-<!-- Roadmap -->
-## :compass: Roadmap
-
-* [x] Create plugin browser
-* [x] Get a Read-mode view for articles
-* [x] Save them in Local Browser (temporally storage)
-* [ ] Create an NFT
-* [ ] Improve Read-mode view
-* [x] Store the content into decentralized storage
-* [ ] Share your articles!
-* [ ] Add comments into the article
-* [ ] Read comments from any other article owners
-* [ ] Boost article discussions
-* [ ] Sell articles NFTs to other users
-* [ ] Marketplace for articles
-
-
 
 <!-- Contributing -->
 ## :wave: Contributing
