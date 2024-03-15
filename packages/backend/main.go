@@ -16,6 +16,8 @@ var db_connection = GetEnvVar("DB_CONNECTION")
 var host = GetEnvVar("HOST")
 var port = GetEnvVar("PORT")
 var gin_realease = GetEnvVar("GIN_RELEASE")
+var tls_cert = GetEnvVar("TLS_CERT")
+var tls_key = GetEnvVar("TLS_KEY")
 
 func main() {
 	slog.SetDefault(Logger)
@@ -87,6 +89,13 @@ func main() {
 		}
 	}
 
+	if tls_cert != "" {
+		err = router.RunTLS(":"+port, tls_cert, tls_key)
+		if err != nil {
+			Logger.Error("Failed To Run With TLS")
+			panic(err)
+		}
+	}
 	err = router.Run(host + ":" + port)
 	if err != nil {
 		Logger.Error(
