@@ -208,6 +208,8 @@ this will take you to a new page where you can manage your storage options,
 to add a new one you just need the server url, an alias of your choice, select the storage option
 and then you can click the "create storage option" button.
 
+you can use our server https://node.collect3.me/
+
 <!-- Run Locally -->
 ### :running: Run Locally
 
