@@ -1,74 +1,30 @@
-import React, { ReactElement, useState } from 'react'
-import logo from './logo.svg'
-import viteLogo from './vite.svg'
-import tailwindLogo from './tailwind.svg'
-import { Link } from 'react-router-dom'
+import { ReactElement } from 'react'
+
 
 function App(): ReactElement {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="p-20 border shadow-xl border-gray-50 rounded-xl">
-      <header>
-        <div className="flex justify-center">
-          <img src={viteLogo} className="w-32 h-32" alt="vite logo" />
-          <img src={logo} className="w-32 h-32" alt="React logo" />
-          <img
-            src={tailwindLogo}
-            className="w-32 h-32"
-            alt="Tailwind CSS logo"
-          />
+    <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+      <div className="container px-4 md:px-6">
+        <div className="flex flex-col items-center space-y-4 text-center">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+              Mint your own NFTs
+            </h1>
+            <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+              Turn your digital art into unique collectibles. Secure. Authentic. Timeless.
+            </p>
+          </div>
+          <div className="space-x-4">
+            <a
+              className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+              href="#"
+            >
+              Get Started
+            </a>
+          </div>
         </div>
-        <p className="pb-3 text-2xl">Hello Vite + React + Tailwind CSS!</p>
-        <p>
-          <button
-            className="pt-1 pb-1 pl-2 pr-2 text-sm text-purple-100 bg-purple-400 rounded"
-            onClick={() => setCount((count) => count + 1)}
-          >
-            count is: {count}
-          </button>
-        </p>
-        <p className="pt-3 pb-3">
-          Edit{' '}
-          <code className="border border-1 pl-1 pr-1 pb-0.5 pt-0.5 rounded border-purple-400 font-mono text-sm bg-purple-100 text-purple-900">
-            src/App.tsx
-          </code>{' '}
-          and save to test HMR updates.
-        </p>
-        <p>
-          <Link to="/about" className="text-purple-400 underline">
-            about
-          </Link>
-          {' | '}
-          <a
-            className="text-purple-400 underline"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="text-purple-400 underline"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-          {' | '}
-          <a
-            className="text-purple-400 underline"
-            href="https://tailwindcss.com/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Tailwind CSS Docs
-          </a>
-        </p>
-      </header>
-    </div>
+      </div>
+    </section>
   )
 }
 

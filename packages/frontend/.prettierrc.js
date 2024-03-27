@@ -8,5 +8,6 @@ module.exports = {
   semi: false,
   useTabs: false,
   bracketSameLine: false,
-  proseWrap: 'never'
+  proseWrap: 'never',
+  semicolons: true
 }
