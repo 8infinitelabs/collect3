@@ -3,6 +3,7 @@ package utils
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mattn/go-sqlite3"
@@ -25,6 +26,12 @@ type Content struct {
 }
 type UserContent struct {
 	User_ID     int64  `db:"user_id"`
+	Content_CID string `db:"content_cid"`
+}
+
+type NFTContent struct {
+	ID          int64  `db:"id"`
+	UID         string `db:"uid"`
 	Content_CID string `db:"content_cid"`
 }
 
@@ -78,6 +85,15 @@ func (db *SQLiteRepository) Migrate() {
       FOREIGN KEY(content_cid) REFERENCES content(cid) ON DELETE CASCADE
     );
   `
+	createNFTContentTable := `
+    CREATE TABLE IF NOT EXISTS nft_content(
+			id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      uid					TEXT NOT NULL,
+      content_cid TEXT NOT NULL,
+      UNIQUE(uid, content_cid),
+      FOREIGN KEY(content_cid) REFERENCES content(cid) ON DELETE CASCADE
+    );
+  `
 
 	tx := db.db.MustBegin()
 
@@ -93,8 +109,8 @@ func (db *SQLiteRepository) Migrate() {
 	tx.MustExec(createUserContentTable)
 	Logger.Info("setting user_content table")
 
-	//tx.MustExec(insertAdminAccount)
-	//Logger.Info("inserting admin account");
+	tx.MustExec(createNFTContentTable)
+	Logger.Info("setting nft_content table")
 
 	err := tx.Commit()
 	if err != nil {
@@ -144,7 +160,7 @@ func (db *SQLiteRepository) UpdateToken(id int64, token string) error {
 
 func (db *SQLiteRepository) GetUserByID(id int64) (User, error) {
 	var user User
-	err := db.db.Get(&user, "SELECT id,uid FROM user WHERE id=?", id)
+	err := db.db.Get(&user, "SELECT * FROM user WHERE id=?", id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, nil
 	}
@@ -156,7 +172,7 @@ func (db *SQLiteRepository) GetUserByID(id int64) (User, error) {
 
 func (db *SQLiteRepository) GetUserByUID(uid string) (User, error) {
 	var user User
-	err := db.db.Get(&user, "SELECT id,uid FROM user WHERE uid=?", uid)
+	err := db.db.Get(&user, "SELECT * FROM user WHERE uid=?", uid)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, nil
 	}
@@ -181,7 +197,7 @@ func (db *SQLiteRepository) AllUsers() ([]User, error) {
 
 func (db *SQLiteRepository) GetContentByCID(cid string) (Content, error) {
 	var content Content
-	err := db.db.Get(&content, "SELECT cid FROM content WHERE cid=?", cid)
+	err := db.db.Get(&content, "SELECT * FROM content WHERE cid=?", cid)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Content{}, nil
 	}
@@ -283,4 +299,75 @@ func (db *SQLiteRepository) UnlinkContent(uid string, cid string) error {
 		return ErrDeleteFailed
 	}
 	return nil
+}
+
+func (db *SQLiteRepository) SetNftUid(uid string, cid string) error {
+	res, err := db.db.Exec("INSERT INTO nft_content(uid, content_cid) values(?,?)", uid, cid)
+	if err != nil {
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) {
+			if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
+				return ErrDuplicate
+			}
+		}
+		return err
+	}
+
+	_, err = res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *SQLiteRepository) GetNftCidByUid(uid string) (NFTContent, error) {
+	var content NFTContent
+	err := db.db.Get(&content, "SELECT * FROM nft_content WHERE uid=?", uid)
+	if errors.Is(err, sql.ErrNoRows) {
+		return NFTContent{}, nil
+	}
+	if err != nil {
+		return NFTContent{}, err
+	}
+	return content, nil
+}
+
+func (db *SQLiteRepository) GetNftIdByCid(cid string) (NFTContent, error) {
+	var content NFTContent
+	err := db.db.Get(&content, "SELECT * FROM nft_content WHERE content_cid=?", cid)
+	if errors.Is(err, sql.ErrNoRows) {
+		return NFTContent{}, nil
+	}
+	if err != nil {
+		return NFTContent{}, err
+	}
+	return content, nil
+}
+
+func (db *SQLiteRepository) GetNextNFTId() (int64, error) {
+	var id int64
+	err := db.db.Get(&id, "SELECT MAX(id) FROM nft_content")
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 1, nil
+		}
+		if strings.Contains(err.Error(), "converting NULL to int64") {
+			return 1, nil
+		}
+		return 0, err
+	}
+	return id + 1, nil
+}
+
+func (db *SQLiteRepository) GetNFTByCid(cid string) (NFTContent, error) {
+	var content NFTContent
+	err := db.db.Get(&content, "SELECT * FROM nft_content WHERE content_cid=?", cid)
+	if errors.Is(err, sql.ErrNoRows) {
+		return NFTContent{}, nil
+	}
+	if err != nil {
+		return NFTContent{}, err
+	}
+	return content, nil
 }
