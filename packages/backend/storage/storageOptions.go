@@ -55,6 +55,7 @@ func SetS5ApiKey(key string) {
 	s5ApiKey = key
 }
 
+// TODO: Iplement a timeout to all the storage calls
 func GetStorage(option string) (Storage, error) {
 	switch option {
 	case SiaOption:

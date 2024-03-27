@@ -52,6 +52,10 @@ func main() {
 	//TODO: Handle properly the 401 errors
 	router.GET("/ping", ping)
 	router.GET("/:storage/available", IsStorageAvailable)
+	router.GET("/nft/:uid", GetUri)
+	router.GET("/nft/id/:cid", GetNftId)
+	router.GET("/nft/metadata/:cid", GetNftMetadata)
+	router.POST("/nft", SetUriToFile)
 	router.POST("/account_exist", AccountExist)
 	router.POST("/create_account", CreateAccount)
 	router.POST("/create_token", CreateToken)
