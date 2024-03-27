@@ -4,10 +4,14 @@ import (
 	. "collect3/backend/routes"
 	. "collect3/backend/storage"
 	. "collect3/backend/utils"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/mdobak/go-xerrors"
 )
@@ -37,6 +41,14 @@ func main() {
 	SetS5ApiKey(key)
 
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
+
+	router.Use(cors.New(config))
+
 	//TODO: Handle properly the 401 errors
 	router.GET("/ping", ping)
 	router.GET("/:storage/available", IsStorageAvailable)
@@ -75,8 +87,61 @@ func main() {
 	}
 
 	if user == (User{}) {
+		s5Key := GetEnvVar("ADMIN_S5_KEY")
+		url := "http://localhost:5050/s5/admin/accounts/new_auth_token?id=1"
+
+		req, err := http.NewRequest(http.MethodPost, url, nil)
+		if err != nil {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			panic(err)
+		}
+
+		req.Header.Add(
+			"Authorization",
+			fmt.Sprintf(
+				"Bearer %s",
+				s5Key,
+			),
+		)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			Logger.Error(
+				xerrors.WithStackTrace(err, 0).Error(),
+			)
+			panic(err)
+		}
+
+		var tokenResponse CreateTokenResponse
+		err = json.NewDecoder(res.Body).Decode(&tokenResponse)
+		if err != nil {
+			defer res.Body.Close()
+			bodyBytes, err := io.ReadAll(res.Body)
+			var bodyString = ""
+			if err == nil {
+				bodyString = string(bodyBytes)
+			}
+			Logger.Error(
+				fmt.Sprintf("Failed To Create Auth Token, Status %d", res.StatusCode),
+				slog.Any(
+					"StackTrace",
+					xerrors.WithStackTrace(
+						xerrors.New("Error"),
+						0,
+					).Error(),
+				),
+				slog.String(
+					"Response.Body",
+					bodyString,
+				),
+			)
+
+			panic(err)
+		}
+
 		//s5-node admin account
-		err = db.CreateUser(1, "admin", "")
+		err = db.CreateUser(1, "admin", tokenResponse.AuthToken)
 		if err != nil {
 			Logger.Error(
 				"Failed to create the id 1 account",
