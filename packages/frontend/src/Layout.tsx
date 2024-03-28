@@ -1,25 +1,23 @@
-import { BrowserProvider, ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { BrowserProvider, ethers } from "ethers";
+import MetaMaskOnboarding from '@metamask/onboarding';
 import { useUserContext } from "./context/userContext";
 import Button from "./components/Button"
 import TestSvg from './TestSvg'
 
+
+const ONBOARD_TEXT = 'Click here to install MetaMask!';
+const CONNECT_TEXT = 'Connect';
+const CONNECTED_TEXT = 'Connected';
+
 export default function Layout() {
   const [isCorrectNetwork, setCorrectNetwork] = useState<boolean>(false);
   const { walletProvider, setWalletProvider, signer, setSigner } = useUserContext()
-
-  function handleEthereum() {
-    window.removeEventListener('ethereum#initialized', handleEthereum);
-    const ethereum = window.ethereum;
-    if (ethereum) {
-      const provider = new ethers.BrowserProvider(ethereum);
-      setWalletProvider!(provider);
-    }
-    else {
-      setWalletProvider!(ethers.getDefaultProvider())
-    }
-  }
+  const [buttonText, setButtonText] = useState(ONBOARD_TEXT);
+  const [isDisabled, setDisabled] = useState(false);
+  const [accounts, setAccounts] = useState<string[]>([]);
+  const onboarding = useRef<MetaMaskOnboarding>();
 
   async function addNetwork() {
     await window.ethereum?.request({
@@ -59,49 +57,81 @@ export default function Layout() {
   }
 
   useEffect(() => {
-    if (window.ethereum) {
-      handleEthereum();
-    } else {
-      window.addEventListener('ethereum#initialized', handleEthereum, { once: true });
-      const timeoutId = setTimeout(() => {
-        handleEthereum();
-      }, 3000);
-      return () => {
-        window.removeEventListener('ethereum#initialized', handleEthereum);
-        clearTimeout(timeoutId)
+    const checkNetwork = async () => {
+      const chainId: string = await window?.ethereum?.request({ method: 'eth_chainId' });
+      console.log(chainId);
+      if (chainId.toLowerCase() === '0x4cb2f') {
+        console.log('correct network');
+        setCorrectNetwork(true);
+      } else {
+        console.log('wrong network');
+        setCorrectNetwork(false);
       }
+    }
+    checkNetwork();
+    const callback = () => {
+      window.location.reload();
+    };
+    //@ts-ignore
+    window.ethereum?.on('chainChanged', callback);
+
+    return () => {
+      //@ts-ignore
+      window.ethereum?.removeListener('chainChanged', callback);
     }
   }, [])
 
   useEffect(() => {
-    if (walletProvider) {
-      const checkNetwork = async () => {
-        const network = await walletProvider?.getNetwork()
-        if (!network) return
-        let chainId = parseInt(network?.chainId.toString());
-        if (chainId === 314159) {
-          setCorrectNetwork(true);
-        } else {
-          setCorrectNetwork(false);
-        }
-      }
-      checkNetwork();
+    if (!onboarding.current) {
+      onboarding.current = new MetaMaskOnboarding();
     }
-  }, [walletProvider])
+  }, []);
 
   useEffect(() => {
-    if (walletProvider) {
-      walletProvider.on('chainChanged', () => {
-        window.location.reload();
-      })
-
-      return () => {
-        walletProvider.removeListener('chainChanged', () => {
-          window.location.reload();
-        })
+    if (MetaMaskOnboarding.isMetaMaskInstalled()) {
+      if (accounts.length > 0) {
+        setButtonText(CONNECTED_TEXT);
+        setDisabled(true);
+        onboarding?.current?.stopOnboarding();
+      } else {
+        setButtonText(CONNECT_TEXT);
+        setDisabled(false);
       }
     }
-  }, [walletProvider])
+  }, [accounts]);
+
+  useEffect(() => {
+    function handleNewAccounts(newAccounts: string[]) {
+      setAccounts(newAccounts);
+      if (window.ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        provider.getSigner().then((signer) => {
+          setSigner!(signer);
+        });
+      }
+    }
+    if (MetaMaskOnboarding.isMetaMaskInstalled()) {
+      window.ethereum
+        ?.request({ method: 'eth_requestAccounts' })
+        .then(handleNewAccounts);
+      //@ts-ignore
+      window.ethereum?.on('accountsChanged', handleNewAccounts);
+      return () => {
+        //@ts-ignore
+        window.ethereum.removeListener('accountsChanged', handleNewAccounts);
+      };
+    }
+  }, []);
+
+  const onClick = () => {
+    if (MetaMaskOnboarding.isMetaMaskInstalled()) {
+      window.ethereum
+        ?.request({ method: 'eth_requestAccounts' })
+        .then((newAccounts) => setAccounts(newAccounts));
+    } else {
+      onboarding?.current?.startOnboarding();
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-[100dvh] w-full">
@@ -112,14 +142,10 @@ export default function Layout() {
         </a>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Button
-            onClick={async () => {
-              if (walletProvider && (walletProvider as BrowserProvider)?.getSigner && !signer) {
-                setSigner!(await (walletProvider as BrowserProvider).getSigner());
-              }
-            }}
-            disabled={!!signer}
+            onClick={onClick}
+            disabled={isDisabled}
           >
-            {!signer ? 'Connect to Wallet' : 'Connected to Wallet'}
+            {buttonText}
           </Button>
           {!isCorrectNetwork && (
             <Button

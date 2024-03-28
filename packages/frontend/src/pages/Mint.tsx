@@ -1,7 +1,7 @@
 import { useUserContext } from '../context/userContext'
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import abi from '../utils/abi'
 
@@ -14,7 +14,16 @@ export default function Mint() {
   const [contract, setContract] = useState<ethers.BaseContract>()
 
   const { cid } = useParams();
-  //get the url and title from the query parameters
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  let title = searchParams.get('title');
+  if (title) {
+    title = decodeURIComponent(title);
+  }
+  let description = searchParams.get('description');
+  if (description) {
+    description = decodeURIComponent(description);
+  }
 
   const fetchData = async () => {
     let localId = 0;
@@ -71,14 +80,14 @@ export default function Mint() {
     <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center space-y-4 text-center">
-          {!minting && (
+          {(!minting && !minted) && (
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  NFT TITLE
+                  {title}
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                  NFT DESCRIPTION
+                  {description}
                 </p>
               </div>
               <Button
@@ -129,6 +138,25 @@ export default function Mint() {
               </div>
               <div className="flex justify-center items-center">
                 <div className="w-8 h-8 rounded-full border-l-2 border-blue-500 animate-spin"></div>
+              </div>
+            </div>
+          )}
+          {minted && (
+            <div className="space-y-2">
+              <div className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                Minted
+              </div>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+                You have successfully minted your NFT.
+              </p>
+              <div className="space-x-4">
+                <a
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                  href={`https://calibration.filfox.info/en/address/${signer?.address}`}
+                  target="_blank"
+                >
+                  Check in Block Explorer
+                </a>
               </div>
             </div>
           )}
