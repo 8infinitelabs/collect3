@@ -1,10 +1,13 @@
 package routes
 
 import (
+	"bytes"
 	. "collect3/backend/storage"
 	. "collect3/backend/utils"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mdobak/go-xerrors"
@@ -75,5 +78,21 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusAccepted, file)
+	file = strings.ReplaceAll(file, "\\\\", "\\")
+
+	quote := []byte{'"'}
+	trimmedData := bytes.TrimPrefix(bytes.TrimSuffix([]byte(file), quote), quote)
+
+	var metadata FullMetadata
+	err = json.Unmarshal(trimmedData, &metadata)
+
+	if err != nil {
+		Logger.Error(
+			xerrors.WithStackTrace(err, 0).Error(),
+		)
+		c.String(http.StatusInternalServerError, "Failed to Get File")
+		return
+	}
+
+	c.JSON(http.StatusOK, metadata)
 }
